@@ -2,7 +2,7 @@ import json
 import requests
 import sys
 
-from caic_html_to_json import parse_forecast
+from caic_html_to_forecast import parse_forecast
 from forecast_to_readable import convert_forecast_to_human_readable_text
 
 def download_html(zone_id):

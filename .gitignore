@@ -1,3 +1,9 @@
+bin
+lib
 __pycache__
+pip-selfcheck.json
+pyvenv.cfg
 *.swp
 *.swo
+*.zip
+*.html
