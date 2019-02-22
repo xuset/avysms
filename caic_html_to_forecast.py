@@ -1,16 +1,9 @@
 import sys
-import traceback
 import json
 from bs4 import BeautifulSoup
 
 from forecast import Forecast
-
-def safe_eval(eval, *args, safe_return_value=None, **kwargs):
-  try:
-    return eval(*args, **kwargs)
-  except Exception:
-    traceback.print_exc(file=sys.stderr)
-  return safe_return_value
+from utils import safe_eval
 
 def find_forecast_description(root):
   return root.find_all("div", attrs={"class": "fx-text-area"})[0].find("p").string
