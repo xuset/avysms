@@ -1,14 +1,11 @@
 
 class Forecast(object):
-  def __init__(self, description):
+  def __init__(self, date, description):
+    self.date = date
     self.description = description
 
   def __str__(self):
-    return str(self.__dict__)
+    return str(dict(self))
 
-  @staticmethod
-  def from_dict(from_dict):
-    return Forecast(**from_dict)
-
-  def to_dict(self):
-    return self.__dict__
+  def __iter__(self):
+    return iter(self.__dict__.items())

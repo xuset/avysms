@@ -18,4 +18,4 @@ def retrieve_forecast(zone_id):
 if __name__ == "__main__":
   sangres_zone_id = 9
   forecast = retrieve_forecast(sangres_zone_id)
-  json.dump(forecast.to_dict(), sys.stdout)
+  json.dump(dict(forecast), sys.stdout)

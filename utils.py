@@ -1,3 +1,4 @@
+import sys
 import traceback
 
 def safe_eval(eval, *args, safe_return_value=None, **kwargs):
