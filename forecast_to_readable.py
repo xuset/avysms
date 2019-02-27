@@ -2,9 +2,7 @@ import sys
 import json
 
 from forecast import Forecast
-
-def is_not_None(obj):
-  return obj is not None
+from utils import is_not_None
 
 def convert_forecast_to_human_readable_text(forecast):
   return '\n\n'.join(filter(is_not_None, [
