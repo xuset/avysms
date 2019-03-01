@@ -35,6 +35,18 @@ class ProblemType(Enum):
   WindSlab = "WindSlab"
   LooseWet = "LooseWet"
 
+class Zone(Enum):
+  Steamboat = "Steamboat"
+  FrontRange = "FrontRange"
+  Vail = "Vail"
+  Sawatch = "Sawatch"
+  Aspen = "Aspen"
+  Gunnison = "Gunnison"
+  GrandMesa = "GrandMesa"
+  NorthSanJuan = "NorthSanJuan"
+  SouthSanJuan = "SouthSanJuan"
+  SangreDeCristo = "SangreDeCristo"
+
 class Data(object):
   def __str__(self):
     return str(dict(self))
@@ -58,7 +70,8 @@ class Problem(Data):
     self.likelyhood = likelyhood
 
 class Forecast(Data):
-  def __init__(self, date, description, problems):
+  def __init__(self, zone, date, description, problems):
+    self.zone = zone
     self.date = date
     self.description = description
     self.problems = list(map(lambda p: Problem(**p), problems))

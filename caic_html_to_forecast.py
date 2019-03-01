@@ -4,7 +4,7 @@ import json
 import jsonpickle
 from bs4 import BeautifulSoup
 
-from forecast import Forecast, ElevationType, AspectType, ProblemType, LikelihoodType, Problem
+from forecast import Forecast, ElevationType, AspectType, ProblemType, LikelihoodType, Problem, Zone
 from utils import safe_eval, safe, is_not_None
 
 PROBLEM_TYPE_ID_TO_NAME = {
@@ -91,9 +91,11 @@ def find_forecast_problem_roots(root):
 def parse_all_forecast_problems(root):
   return list(map(parse_forecast_problem, find_forecast_problem_roots(root)))
 
-def parse_forecast(html):
+def parse_forecast(html, zone=None):
   soup = BeautifulSoup(html, 'html.parser')
   root = soup.find(id="avalanche-forecast")
+
+  zone = zone.name if zone is not None else None
 
   date = parse_forecast_date(root)
 
@@ -101,7 +103,7 @@ def parse_forecast(html):
 
   problems = parse_all_forecast_problems(root)
 
-  return Forecast(date, description, problems)
+  return Forecast(zone, date, description, problems)
 
 if __name__ == "__main__":
   print(parse_forecast(sys.stdin).to_json())

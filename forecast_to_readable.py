@@ -1,8 +1,21 @@
 import sys
 import json
 
-from forecast import Forecast, LikelihoodType, ProblemType, ElevationType, AspectType
+from forecast import Forecast, LikelihoodType, ProblemType, ElevationType, AspectType, Zone
 from utils import is_not_None, safe
+
+ZONE_TO_TEXT = {
+  Zone.Steamboat.name: "Steamboat & Flat Tops",
+  Zone.FrontRange.name: "Front Range",
+  Zone.Vail.name: "Vail & Summit County",
+  Zone.Sawatch.name: "Sawatch",
+  Zone.Aspen.name: "Aspen",
+  Zone.Gunnison.name: "Gunnison",
+  Zone.GrandMesa.name: "Grand Mesa",
+  Zone.NorthSanJuan.name: "North San Juan",
+  Zone.SouthSanJuan.name: "South San Juan",
+  Zone.SangreDeCristo.name: "Sangre De Cristo",
+}
 
 LIKELYHOOD_TO_TEXT = {
   LikelihoodType.Unlikely.name: "unlikely",
@@ -40,7 +53,7 @@ ASPECT_ORDER = {
   AspectType.NW.name: 7
 }
 
-@safe()
+@safe(safe_return_value="Error retrieving forecast elevation data")
 def convert_problem_rose_elevation_to_human_readable(elevation, problem_rose_elevation):
   aspect_entries = list(problem_rose_elevation.items())
   aspect_entries.sort(key=lambda e: ASPECT_ORDER[e[0]])
@@ -48,6 +61,7 @@ def convert_problem_rose_elevation_to_human_readable(elevation, problem_rose_ele
   aspect_entries = map(lambda e: e[0], aspect_entries)
   return "    " + ELEVATIONS_TO_TEXT.get(elevation, "") + ": " + " ".join(aspect_entries)
 
+@safe(safe_return_value="")
 def convert_problem_rose_to_human_readable(problem_rose):
   elevation_entries = list(problem_rose.items())
   elevation_entries.sort(key=lambda e: ELEVATION_ORDER[e[0]])
@@ -55,6 +69,7 @@ def convert_problem_rose_to_human_readable(problem_rose):
   elevation_entries = filter(is_not_None, elevation_entries)
   return "\n".join(elevation_entries)
 
+@safe(safe_return_value="Error retrieving forecast problems")
 def convert_problem_to_human_readable(problem):
   return "".join([
     "There is a ",
@@ -66,9 +81,10 @@ def convert_problem_to_human_readable(problem):
     convert_problem_rose_to_human_readable(problem.rose)
   ])
 
+@safe(safe_return_value="Error retrieving forecast")
 def convert_forecast_to_human_readable_text(forecast):
   return '\n\n'.join(filter(is_not_None, [
-    forecast.date,
+    " - ".join(filter(is_not_None, [ZONE_TO_TEXT.get(forecast.zone, None), forecast.date])),
     forecast.description,
     *map(convert_problem_to_human_readable, forecast.problems)
   ]))
