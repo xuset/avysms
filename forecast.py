@@ -1,3 +1,5 @@
+import jsonpickle
+import json
 from enum import Enum
 
 class AspectType(Enum):
@@ -33,13 +35,30 @@ class ProblemType(Enum):
   WindSlab = "WindSlab"
   LooseWet = "LooseWet"
 
-class Forecast(object):
-  def __init__(self, date, description):
-    self.date = date
-    self.description = description
-
+class Data(object):
   def __str__(self):
     return str(dict(self))
 
   def __iter__(self):
-    return iter(self.__dict__.items())
+    return iter(json.loads(jsonpickle.encode(self, unpicklable=False)).items())
+
+  def to_json(self):
+    return jsonpickle.encode(self)
+
+  @staticmethod
+  def from_json(json_str):
+    return jsonpickle.decode(json_str.read())
+
+
+class Problem(Data):
+  def __init__(self, rose, problem_type, size, likelyhood):
+    self.rose = rose
+    self.problem_type = problem_type
+    self.size = size
+    self.likelyhood = likelyhood
+
+class Forecast(Data):
+  def __init__(self, date, description, problems):
+    self.date = date
+    self.description = description
+    self.problems = list(map(lambda p: Problem(**p), problems))

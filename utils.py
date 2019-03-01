@@ -4,10 +4,12 @@ import traceback
 def is_not_None(obj):
   return obj is not None
 
-def safe(function, safe_return_value=None):
-  def internal(*args, **kwargs):
-    return safe_eval(function, *args, safe_return_value=safe_return_value, **kwargs)
-  return internal
+def safe(safe_return_value=None):
+  def wrap(function):
+    def internal(*args, **kwargs):
+      return safe_eval(function, *args, safe_return_value=safe_return_value, **kwargs)
+    return internal
+  return wrap
 
 def safe_eval(eval, *args, safe_return_value=None, **kwargs):
   try:
