@@ -4,7 +4,7 @@ import json
 import jsonpickle
 from bs4 import BeautifulSoup
 
-from forecast import Forecast, ElevationType, AspectType, ProblemType, LikelihoodType, Problem, Zone
+from forecast import Forecast, ElevationType, AspectType, ProblemType, LikelihoodType, Problem, Zone, DangerType
 from utils import safe_eval, safe, is_not_None
 
 PROBLEM_TYPE_ID_TO_NAME = {
@@ -19,6 +19,20 @@ PROBLEM_LIKELIHOOD_ID_TO_NAME = {
   'Likely': LikelihoodType.Likely,
   'Very_Likely': LikelihoodType.VeryLikely,
   'Certain': LikelihoodType.Certain
+}
+
+DANGER_ELEVATION_ID_TO_NAME = {
+  'above': ElevationType.AboveTreeline.name,
+  'near': ElevationType.Treeline.name,
+  'below': ElevationType.BelowTreeline.name,
+}
+
+DANGER_ID_TO_NAME = {
+  'low': DangerType.Low.name,
+  'moderate': DangerType.Moderate.name,
+  'considerable': DangerType.Considerable.name,
+  'high': DangerType.High.name,
+  'extreme': DangerType.Extreme.name,
 }
 
 @safe()
@@ -128,6 +142,21 @@ def parse_all_warnings(html_root):
   warning_roots = html_root.find_all('div', attrs={'class': 'avalanche-warning'})
   return filter(is_not_None, map(parse_warning, warning_roots))
 
+@safe()
+def parse_danger(danger_root):
+  danger_td_class = str(danger_root.find('td', attrs={'class': 'today-text'}).attrs['class'])
+  danger_elevation_id, danger_id = re.search('(\w+)_danger_(\w+)', danger_td_class).group(1, 2)
+  return {
+    "elevation": DANGER_ELEVATION_ID_TO_NAME[danger_elevation_id],
+    "danger_type": DANGER_ID_TO_NAME[danger_id]
+  }
+
+@safe()
+def parse_all_dangers(forecast_root):
+  all_dangers_root = forecast_root.find('table', attrs={'class': 'table-treeline'})
+
+  return list(filter(is_not_None, map(parse_danger, all_dangers_root.find('tbody').find_all('tr'))))
+
 def parse_forecast(html, zone=None):
   html_root = BeautifulSoup(html, 'html.parser')
   forecast_root = html_root.find(id="avalanche-forecast")
@@ -142,7 +171,9 @@ def parse_forecast(html, zone=None):
 
   warnings = parse_all_warnings(html_root)
 
-  return Forecast(zone, date, description, problems, warnings)
+  dangers = parse_all_dangers(forecast_root)
+
+  return Forecast(zone, date, description, problems, warnings, dangers)
 
 if __name__ == "__main__":
   print(parse_forecast(sys.stdin).to_json())

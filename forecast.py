@@ -30,6 +30,13 @@ class SizeType(Enum):
   VeryLarge = 2
   Historic = 3
 
+class DangerType(Enum):
+  Low = 0
+  Moderate = 1
+  Considerable = 2
+  High = 3
+  Extreme = 4
+
 class ProblemType(Enum):
   PersistentSlab = "PersistentSlab"
   WindSlab = "WindSlab"
@@ -61,6 +68,10 @@ class Data(object):
   def from_json(json_str):
     return jsonpickle.decode(json_str.read())
 
+class Danger(Data):
+  def __init__(self, elevation, danger_type):
+    self.elevation = elevation
+    self.danger_type = danger_type
 
 class Problem(Data):
   def __init__(self, rose, problem_type, size, likelyhood):
@@ -77,9 +88,10 @@ class Warning(Data):
     self.description = description
 
 class Forecast(Data):
-  def __init__(self, zone, date, description, problems, warnings):
+  def __init__(self, zone, date, description, problems, warnings, dangers):
     self.zone = zone
     self.date = date
     self.description = description
+    self.dangers = list(map(lambda d: Danger(**d), dangers))
     self.problems = list(map(lambda p: Problem(**p), problems))
     self.warnings = list(map(lambda w: Warning(**w), warnings))

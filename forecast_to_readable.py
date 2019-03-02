@@ -1,7 +1,7 @@
 import sys
 import json
 
-from forecast import Forecast, LikelihoodType, ProblemType, ElevationType, AspectType, Zone
+from forecast import Forecast, LikelihoodType, ProblemType, ElevationType, AspectType, Zone, DangerType
 from utils import is_not_None, safe
 
 ZONE_TO_TEXT = {
@@ -53,6 +53,14 @@ ASPECT_ORDER = {
   AspectType.NW.name: 7
 }
 
+DANGER_TYPE_TO_TEXT = {
+  DangerType.Low.name: 'low',
+  DangerType.Moderate.name: 'moderate',
+  DangerType.Considerable.name: 'considerable',
+  DangerType.High.name: 'high',
+  DangerType.Extreme.name: 'extreme',
+}
+
 @safe(safe_return_value="Error retrieving forecast elevation data")
 def convert_problem_rose_elevation_to_human_readable(elevation, problem_rose_elevation):
   aspect_entries = list(problem_rose_elevation.items())
@@ -99,10 +107,23 @@ def convert_warning_to_human_readable(warning):
 def convert_all_warnings_to_human_readable(warnings):
   return "\n\n".join(map(convert_warning_to_human_readable, warnings))
 
+@safe()
+def convert_danger_to_human_readable(danger):
+  return "     " + ELEVATIONS_TO_TEXT[danger.elevation] + ": " + DANGER_TYPE_TO_TEXT[danger.danger_type]
+
+@safe()
+def convert_all_dangers_to_human_readable(dangers):
+  dangers.sort(key=lambda d: ELEVATION_ORDER[d.elevation])
+  return "\n".join(filter(is_not_None, [
+    "Avalanche dangers:",
+    *map(convert_danger_to_human_readable, dangers)
+  ]))
+
 @safe(safe_return_value="Error retrieving forecast")
 def convert_forecast_to_human_readable_text(forecast):
   return '\n\n'.join(filter(is_not_None, [
     " - ".join(filter(is_not_None, [ZONE_TO_TEXT.get(forecast.zone, None), forecast.date])),
+    convert_all_dangers_to_human_readable(forecast.dangers),
     forecast.description,
     *map(convert_problem_to_human_readable, forecast.problems),
     convert_all_warnings_to_human_readable(forecast.warnings)
