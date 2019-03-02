@@ -134,5 +134,6 @@ def convert_forecast_to_text(forecast):
 
 if __name__ == "__main__":
   forecast = Forecast.from_json(sys.stdin)
-  print(convert_forecast_to_text(forecast))
+  sys.stdout.write(convert_forecast_to_text(forecast))
+  sys.stdout.flush()
   

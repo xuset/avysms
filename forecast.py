@@ -66,7 +66,7 @@ class Data(object):
 
   @staticmethod
   def from_json(json_str):
-    return jsonpickle.decode(json_str.read())
+    return jsonpickle.decode(json_str if not hasattr(json_str, 'read') else json_str.read())
 
 class Danger(Data):
   def __init__(self, elevation, danger_type):
