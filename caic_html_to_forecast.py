@@ -46,11 +46,11 @@ DANGER_ID_TO_NAME = {
 
 @safe()
 def parse_forecast_date(forecast_root):
-  return forecast_root.find_all("h2")[0].contents[0].strip()
+  return forecast_root.find("h2").contents[0].strip()
 
 @safe()
 def parse_forecast_description(forecast_root):
-  return forecast_root.find_all("div", attrs={"class": "fx-text-area"})[0] \
+  return forecast_root.find("div", attrs={"class": "fx-text-area"}) \
     .find("p").string.replace("\u00a0", "")
 
 @safe()
@@ -61,13 +61,13 @@ def parse_problem_type(problem_root):
 
 @safe()
 def parse_problem_likelihood(problem_root):
-  likelihood_root = problem_root.find_all('div', attrs={'class': 'likelihood-graphic'})[0]
-  likelihood_id = likelihood_root.find_all('div', attrs={'class': 'on'})[0]['id']
+  likelihood_root = problem_root.find('div', attrs={'class': 'likelihood-graphic'})
+  likelihood_id = likelihood_root.find('div', attrs={'class': 'on'})['id']
   return PROBLEM_LIKELIHOOD_ID_TO_TYPE[re.search('(\w+)_\d', likelihood_id).group(1)].name
 
 @safe()
 def parse_problem_size(problem_root):
-  return None
+  return None # TODO implement problem size parsing
 
 @safe()
 def is_elevation_aspect_problematic(rose_root, elevation, aspect):
@@ -76,8 +76,8 @@ def is_elevation_aspect_problematic(rose_root, elevation, aspect):
   return 'on' in rose_root.find(id=id_regex).get_attribute_list("class")
 
 @safe()
-def parse_forecast_problem_rose(problem_root):
-  rose_root = problem_root.find_all("div", attrs={"class": "ProblemRose"})[0]
+def parse_problem_rose(problem_root):
+  rose_root = problem_root.find("div", attrs={"class": "ProblemRose"})
 
   problem_rose = {elevation.name:
     {aspect.name: is_elevation_aspect_problematic(rose_root, elevation, aspect)
@@ -87,56 +87,53 @@ def parse_forecast_problem_rose(problem_root):
   return problem_rose
 
 @safe()
-def parse_forecast_problem(problem_root):
-  problem_type = parse_problem_type(problem_root)
-  problem_likelihood = parse_problem_likelihood(problem_root)
-  problem_size = parse_problem_size(problem_root)
-  problem_rose = parse_forecast_problem_rose(problem_root)
-
+def parse_problem(problem_root):
   return {
-    "problem_type": problem_type,
-    "likelyhood": problem_likelihood,
-    "size": problem_size,
-    "rose": problem_rose
+    "problem_type": parse_problem_type(problem_root),
+    "likelyhood": parse_problem_likelihood(problem_root),
+    "size": parse_problem_size(problem_root),
+    "rose": parse_problem_rose(problem_root)
   }
 
 @safe()
-def find_forecast_problem_root_from_table(table):
+def find_problem_root_from_table(table):
   return table.parent
 
-@safe()
-def find_forecast_problem_roots(forecast_root):
+@safe(safe_return_value=[])
+def find_all_problem_roots(forecast_root):
   tables = forecast_root.find_all("table", attrs={"class": "table-persistent-slab"})
-  problem_roots = map(find_forecast_problem_root_from_table, tables)
+  problem_roots = map(find_problem_root_from_table, tables)
   problem_roots = filter(is_not_None, problem_roots)
-  problem_roots = filter(lambda elem: elem.get('style') != 'display: none;', problem_roots)
+  problem_roots = filter(lambda elem: 'display: none' not in str(elem.get('style')), problem_roots)
   return list(problem_roots)
 
 @safe(safe_return_value=[])
-def parse_all_forecast_problems(forecast_root):
-  return list(map(parse_forecast_problem, find_forecast_problem_roots(forecast_root)))
+def parse_all_problems(forecast_root):
+  problems = map(parse_problem, find_all_problem_roots(forecast_root))
+  problems = filter(is_not_None, problems)
+  return list(problems)
 
 @safe()
 def parse_warning_issued_datetime(warning_root):
-  meta_list = list(warning_root.find_all('div', attrs={'class': 'title'})[0].strings)
+  meta_list = list(warning_root.find('div', attrs={'class': 'title'}).strings)
   issued_index = meta_list.index("Issued:") + 1
   return str(meta_list[issued_index]).strip()
 
 @safe()
 def parse_warning_expires_datetime(warning_root):
-  meta_list = list(warning_root.find_all('div', attrs={'class': 'title'})[0].strings)
+  meta_list = list(warning_root.find('div', attrs={'class': 'title'}).strings)
   expires_index = meta_list.index("Expires:") + 1
   return str(meta_list[expires_index]).strip()
 
 @safe()
 def parse_warning_title(warning_root):
-  meta_root = warning_root.find_all('div', attrs={'class': 'title'})[0]
-  title_root = meta_root.find_all('strong')[0]
+  meta_root = warning_root.find('div', attrs={'class': 'title'})
+  title_root = meta_root.find('strong')
   return str(title_root.string)
 
 @safe()
 def parse_warning_description(warning_root):
-  content_root = warning_root.find_all('div', attrs={'class': 'content'})[0]
+  content_root = warning_root.find('div', attrs={'class': 'content'})
   return "\n".join(content_root.strings).replace('\xa0', '')
 
 @safe()
@@ -151,7 +148,9 @@ def parse_warning(warning_root):
 @safe(safe_return_value=[])
 def parse_all_warnings(html_root):
   warning_roots = html_root.find_all('div', attrs={'class': 'avalanche-warning'})
-  return filter(is_not_None, map(parse_warning, warning_roots))
+  warnings = map(parse_warning, warning_roots)
+  warnings = filter(is_not_None, warnings)
+  return list(warnings)
 
 @safe()
 def parse_danger(danger_root):
@@ -162,26 +161,23 @@ def parse_danger(danger_root):
     "danger_type": DANGER_ID_TO_NAME[danger_id].name
   }
 
-@safe()
+@safe(safe_return_value=[])
 def parse_all_dangers(forecast_root):
-  all_dangers_root = forecast_root.find('table', attrs={'class': 'table-treeline'})
-
-  return list(filter(is_not_None, map(parse_danger, all_dangers_root.find('tbody').find_all('tr'))))
+  danger_roots = forecast_root.find('table', attrs={'class': 'table-treeline'}) \
+                              .find('tbody').find_all('tr')
+  dangers = map(parse_danger, danger_roots)
+  dangers = filter(is_not_None, dangers)
+  return list(dangers)
 
 def parse_forecast(html, zone=None):
   html_root = BeautifulSoup(html, 'html.parser')
   forecast_root = html_root.find(id="avalanche-forecast")
 
   zone = zone.name if zone is not None else None
-
   date = parse_forecast_date(forecast_root)
-
   description = parse_forecast_description(forecast_root)
-
-  problems = parse_all_forecast_problems(forecast_root)
-
+  problems = parse_all_problems(forecast_root)
   warnings = parse_all_warnings(html_root)
-
   dangers = parse_all_dangers(forecast_root)
 
   return Forecast(zone, date, description, problems, warnings, dangers)
