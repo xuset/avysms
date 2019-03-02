@@ -62,7 +62,7 @@ DANGER_TYPE_TO_TEXT = {
 }
 
 @safe(safe_return_value="Error retrieving forecast elevation data")
-def convert_problem_rose_elevation_to_human_readable(elevation, problem_rose_elevation):
+def convert_problem_rose_elevation_to_text(elevation, problem_rose_elevation):
   aspect_entries = list(problem_rose_elevation.items())
   aspect_entries.sort(key=lambda e: ASPECT_ORDER[e[0]])
   aspect_entries = filter(lambda e: e[1] == True or e[1] == None, aspect_entries)
@@ -70,15 +70,15 @@ def convert_problem_rose_elevation_to_human_readable(elevation, problem_rose_ele
   return "    " + ELEVATIONS_TO_TEXT.get(elevation, "") + ": " + " ".join(aspect_entries)
 
 @safe(safe_return_value="")
-def convert_problem_rose_to_human_readable(problem_rose):
+def convert_problem_rose_to_text(problem_rose):
   elevation_entries = list(problem_rose.items())
   elevation_entries.sort(key=lambda e: ELEVATION_ORDER[e[0]])
-  elevation_entries = map(lambda e: convert_problem_rose_elevation_to_human_readable(*e), elevation_entries)
+  elevation_entries = map(lambda e: convert_problem_rose_elevation_to_text(*e), elevation_entries)
   elevation_entries = filter(is_not_None, elevation_entries)
   return "\n".join(elevation_entries)
 
 @safe(safe_return_value="Error retrieving forecast problems")
-def convert_problem_to_human_readable(problem):
+def convert_problem_to_text(problem):
   return "".join([
     "There is a ",
     LIKELYHOOD_TO_TEXT.get(problem.likelyhood, ""),
@@ -86,11 +86,11 @@ def convert_problem_to_human_readable(problem):
     PROBLEM_TYPE_TO_TEXT.get(problem.problem_type, "unknown"),
     " avalanche problem",
     "\n",
-    convert_problem_rose_to_human_readable(problem.rose)
+    convert_problem_rose_to_text(problem.rose)
   ])
 
 @safe(safe_return_value="Avalanche warning:")
-def convert_warning_title_to_human_readable(warning):
+def convert_warning_title_to_text(warning):
   return (
     " ".join(filter(is_not_None, [
       warning.title if warning.title is not None else "Avalanche warning",
@@ -98,39 +98,39 @@ def convert_warning_title_to_human_readable(warning):
     + ":")
 
 @safe()
-def convert_warning_to_human_readable(warning):
+def convert_warning_to_text(warning):
   return "\n".join([
-    convert_warning_title_to_human_readable(warning),
+    convert_warning_title_to_text(warning),
     warning.description])
 
 @safe("Unable to retrieve avalanche watches")
-def convert_all_warnings_to_human_readable(warnings):
-  return "\n\n".join(map(convert_warning_to_human_readable, warnings))
+def convert_all_warnings_to_text(warnings):
+  return "\n\n".join(map(convert_warning_to_text, warnings))
 
 @safe()
-def convert_danger_to_human_readable(danger):
+def convert_danger_to_text(danger):
   return "     " + ELEVATIONS_TO_TEXT[danger.elevation] + ": " + DANGER_TYPE_TO_TEXT[danger.danger_type]
 
 @safe()
-def convert_all_dangers_to_human_readable(dangers):
+def convert_all_dangers_to_text(dangers):
   dangers.sort(key=lambda d: ELEVATION_ORDER[d.elevation])
   return "\n".join(filter(is_not_None, [
     "Avalanche dangers:",
-    *map(convert_danger_to_human_readable, dangers)
+    *map(convert_danger_to_text, dangers)
   ]))
 
 @safe(safe_return_value="Error retrieving forecast")
-def convert_forecast_to_human_readable_text(forecast):
+def convert_forecast_to_text(forecast):
   return '\n\n'.join(filter(is_not_None, [
     " - ".join(filter(is_not_None, [ZONE_TO_TEXT.get(forecast.zone, None), forecast.date])),
-    convert_all_dangers_to_human_readable(forecast.dangers),
+    convert_all_dangers_to_text(forecast.dangers),
     forecast.description,
-    *map(convert_problem_to_human_readable, forecast.problems),
-    convert_all_warnings_to_human_readable(forecast.warnings)
+    *map(convert_problem_to_text, forecast.problems),
+    convert_all_warnings_to_text(forecast.warnings)
   ]))
 
 if __name__ == "__main__":
   forecast = Forecast.from_json(sys.stdin)
-  print(convert_forecast_to_human_readable_text(forecast))
+  print(convert_forecast_to_text(forecast))
   
   

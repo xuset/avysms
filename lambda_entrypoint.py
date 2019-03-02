@@ -2,7 +2,6 @@ import json
 import sys
 
 from text_interface import do_command
-from forecast_to_readable import convert_forecast_to_human_readable_text
 
 def lambda_handler(event, context):
   print('event=lambda_invoked, lambda_event={}, lambda_context={}'.format(event, context), file=sys.stderr)

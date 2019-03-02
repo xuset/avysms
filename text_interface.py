@@ -4,7 +4,7 @@ from forecast import Zone
 from utils import safe
 from download_caic_html import download_html
 from caic_html_to_forecast import parse_forecast
-from forecast_to_readable import convert_forecast_to_human_readable_text
+from forecast_to_text import convert_forecast_to_text
 
 
 CAIC_ZONES_IDS = {
@@ -47,7 +47,7 @@ def do_command(text):
       zone = CAIC_ZONES_IDS_TO_ZONES.get(zone_id, None)
       html = download_html(zone_id)
       forecast = parse_forecast(html, zone)
-      return convert_forecast_to_human_readable_text(forecast)
+      return convert_forecast_to_text(forecast)
   return HELP_TEXT
 
 if __name__ == "__main__":
