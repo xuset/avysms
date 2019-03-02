@@ -1,19 +1,22 @@
+#! /usr/bin/env python3
+
 import re
 import sys
 import json
 import jsonpickle
 from bs4 import BeautifulSoup
 
-from forecast import Forecast, ElevationType, AspectType, ProblemType, LikelihoodType, Problem, Zone, DangerType
+from forecast import Forecast, ElevationType, AspectType, ProblemType, LikelihoodType, \
+                     Problem, Zone, DangerType
 from utils import safe_eval, safe, is_not_None
 
-PROBLEM_TYPE_ID_TO_NAME = {
+PROBLEM_TYPE_ID_TO_TYPE = {
   117: ProblemType.PersistentSlab,
   116: ProblemType.LooseWet,
   114: ProblemType.WindSlab
 }
 
-PROBLEM_LIKELIHOOD_ID_TO_NAME = {
+PROBLEM_LIKELIHOOD_ID_TO_TYPE = {
   'Unlikely': LikelihoodType.Unlikely,
   'Possible': LikelihoodType.Possible,
   'Likely': LikelihoodType.Likely,
@@ -22,23 +25,23 @@ PROBLEM_LIKELIHOOD_ID_TO_NAME = {
 }
 
 ELEVATION_TYPE_TO_PROBLEM_ELEVATION_ID = {
-  ElevationType.BelowTreeline.name: "Btl",
-  ElevationType.Treeline.name: "Tln",
-  ElevationType.AboveTreeline.name: "Alp"
+  ElevationType.BelowTreeline: "Btl",
+  ElevationType.Treeline: "Tln",
+  ElevationType.AboveTreeline: "Alp"
 }
 
 DANGER_ELEVATION_ID_TO_NAME = {
-  'above': ElevationType.AboveTreeline.name,
-  'near': ElevationType.Treeline.name,
-  'below': ElevationType.BelowTreeline.name,
+  'above': ElevationType.AboveTreeline,
+  'near': ElevationType.Treeline,
+  'below': ElevationType.BelowTreeline,
 }
 
 DANGER_ID_TO_NAME = {
-  'low': DangerType.Low.name,
-  'moderate': DangerType.Moderate.name,
-  'considerable': DangerType.Considerable.name,
-  'high': DangerType.High.name,
-  'extreme': DangerType.Extreme.name,
+  'low': DangerType.Low,
+  'moderate': DangerType.Moderate,
+  'considerable': DangerType.Considerable,
+  'high': DangerType.High,
+  'extreme': DangerType.Extreme,
 }
 
 @safe()
@@ -54,13 +57,13 @@ def parse_forecast_description(forecast_root):
 def parse_problem_type(problem_root):
   problem_type_url = problem_root.find("a", attrs={"data-fancybox-type": "iframe"})["href"]
   problem_type_id = int(re.search('.*post_id=(\d+).*', problem_type_url).group(1))
-  return PROBLEM_TYPE_ID_TO_NAME[problem_type_id].name
+  return PROBLEM_TYPE_ID_TO_TYPE[problem_type_id].name
 
 @safe()
 def parse_problem_likelihood(problem_root):
   likelihood_root = problem_root.find_all('div', attrs={'class': 'likelihood-graphic'})[0]
   likelihood_id = likelihood_root.find_all('div', attrs={'class': 'on'})[0]['id']
-  return PROBLEM_LIKELIHOOD_ID_TO_NAME[re.search('(\w+)_\d', likelihood_id).group(1)].name
+  return PROBLEM_LIKELIHOOD_ID_TO_TYPE[re.search('(\w+)_\d', likelihood_id).group(1)].name
 
 @safe()
 def parse_problem_size(problem_root):
@@ -68,7 +71,7 @@ def parse_problem_size(problem_root):
 
 @safe()
 def is_elevation_aspect_problematic(rose_root, elevation, aspect):
-  elevation_class = ELEVATION_TYPE_TO_PROBLEM_ELEVATION_ID[elevation.name]
+  elevation_class = ELEVATION_TYPE_TO_PROBLEM_ELEVATION_ID[elevation]
   id_regex = re.compile(aspect.value + elevation_class + "_\d")
   return 'on' in rose_root.find(id=id_regex).get_attribute_list("class")
 
@@ -155,8 +158,8 @@ def parse_danger(danger_root):
   danger_td_class = str(danger_root.find('td', attrs={'class': 'today-text'}).attrs['class'])
   danger_elevation_id, danger_id = re.search('(\w+)_danger_(\w+)', danger_td_class).group(1, 2)
   return {
-    "elevation": DANGER_ELEVATION_ID_TO_NAME[danger_elevation_id],
-    "danger_type": DANGER_ID_TO_NAME[danger_id]
+    "elevation": DANGER_ELEVATION_ID_TO_NAME[danger_elevation_id].name,
+    "danger_type": DANGER_ID_TO_NAME[danger_id].name
   }
 
 @safe()

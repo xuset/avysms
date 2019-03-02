@@ -1,7 +1,8 @@
 import sys
 import json
 
-from forecast import Forecast, LikelihoodType, ProblemType, ElevationType, AspectType, Zone, DangerType
+from forecast import Forecast, LikelihoodType, ProblemType, ElevationType, AspectType, \
+                     Zone, DangerType
 from utils import is_not_None, safe
 
 ZONE_TO_TEXT = {
@@ -132,5 +133,4 @@ def convert_forecast_to_text(forecast):
 if __name__ == "__main__":
   forecast = Forecast.from_json(sys.stdin)
   print(convert_forecast_to_text(forecast))
-  
   
