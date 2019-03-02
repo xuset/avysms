@@ -13,9 +13,9 @@ class AspectType(Enum):
   NW = "NW"
 
 class ElevationType(Enum):
-  BelowTreeline = "Btl"
-  Treeline = "Tln"
-  AboveTreeline = "Alp"
+  BelowTreeline = 0
+  Treeline = 1
+  AboveTreeline = 2
 
 class LikelihoodType(Enum):
   Unlikely = 0

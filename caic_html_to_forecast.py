@@ -21,6 +21,12 @@ PROBLEM_LIKELIHOOD_ID_TO_NAME = {
   'Certain': LikelihoodType.Certain
 }
 
+ELEVATION_TYPE_TO_PROBLEM_ELEVATION_ID = {
+  ElevationType.BelowTreeline.name: "Btl",
+  ElevationType.Treeline.name: "Tln",
+  ElevationType.AboveTreeline.name: "Alp"
+}
+
 DANGER_ELEVATION_ID_TO_NAME = {
   'above': ElevationType.AboveTreeline.name,
   'near': ElevationType.Treeline.name,
@@ -62,7 +68,9 @@ def parse_problem_size(problem_root):
 
 @safe()
 def is_elevation_aspect_problematic(rose_root, elevation, aspect):
-  return 'on' in rose_root.find(id=re.compile(aspect.value + elevation.value + "_\d")).get_attribute_list("class")
+  elevation_class = ELEVATION_TYPE_TO_PROBLEM_ELEVATION_ID[elevation.name]
+  id_regex = re.compile(aspect.value + elevation_class + "_\d")
+  return 'on' in rose_root.find(id=id_regex).get_attribute_list("class")
 
 @safe()
 def parse_forecast_problem_rose(problem_root):
