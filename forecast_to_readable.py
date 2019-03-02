@@ -81,12 +81,31 @@ def convert_problem_to_human_readable(problem):
     convert_problem_rose_to_human_readable(problem.rose)
   ])
 
+@safe(safe_return_value="Avalanche warning:")
+def convert_warning_title_to_human_readable(warning):
+  return (
+    " ".join(filter(is_not_None, [
+      warning.title if warning.title is not None else "Avalanche warning",
+      "expires on " + warning.expires if warning.expires is not None else None]))
+    + ":")
+
+@safe()
+def convert_warning_to_human_readable(warning):
+  return "\n".join([
+    convert_warning_title_to_human_readable(warning),
+    warning.description])
+
+@safe("Unable to retrieve avalanche watches")
+def convert_all_warnings_to_human_readable(warnings):
+  return "\n\n".join(map(convert_warning_to_human_readable, warnings))
+
 @safe(safe_return_value="Error retrieving forecast")
 def convert_forecast_to_human_readable_text(forecast):
   return '\n\n'.join(filter(is_not_None, [
     " - ".join(filter(is_not_None, [ZONE_TO_TEXT.get(forecast.zone, None), forecast.date])),
     forecast.description,
-    *map(convert_problem_to_human_readable, forecast.problems)
+    *map(convert_problem_to_human_readable, forecast.problems),
+    convert_all_warnings_to_human_readable(forecast.warnings)
   ]))
 
 if __name__ == "__main__":

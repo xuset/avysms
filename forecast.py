@@ -69,9 +69,17 @@ class Problem(Data):
     self.size = size
     self.likelyhood = likelyhood
 
+class Warning(Data):
+  def __init__(self, issued, expires, title, description):
+    self.issued = issued
+    self.expires = expires
+    self.title = title
+    self.description = description
+
 class Forecast(Data):
-  def __init__(self, zone, date, description, problems):
+  def __init__(self, zone, date, description, problems, warnings):
     self.zone = zone
     self.date = date
     self.description = description
     self.problems = list(map(lambda p: Problem(**p), problems))
+    self.warnings = list(map(lambda w: Warning(**w), warnings))
