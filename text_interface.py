@@ -2,7 +2,7 @@ import sys
 
 from forecast import Zone
 from utils import safe
-from download_caic_forecast import download_html
+from download_caic_html import download_html
 from caic_html_to_forecast import parse_forecast
 from forecast_to_readable import convert_forecast_to_human_readable_text
 
