@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -e
+
+SCRIPT_DIR=$(dirname "$0")
+BUNDLE_PATH="$SCRIPT_DIR/../avysms-entrypoint-lambda.zip"
+LAMBDA_NAME="avysms-entrypoint"
+
+aws lambda update-function-code \
+  --function-name "$LAMBDA_NAME" \
+  --zip-file "fileb://$BUNDLE_PATH"
