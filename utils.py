@@ -1,3 +1,4 @@
+import traceback
 import logging
 import sys
 
@@ -5,10 +6,12 @@ import sys
 def logger(name):
     logging.basicConfig(
         level=logging.INFO,
-        format="[%(asctime)s] [%(name)s] - %(levelname)s - %(message)s",
+        format="[%(asctime)s %(levelname)s %(name)s] %(message)s",
         datefmt="%m-%d-%YT%H:%M:%S%z",
         stream=sys.stderr)
-    return logging.getLogger(name)
+    log = logging.getLogger(name)
+    log.setLevel(logging.INFO)
+    return log
 
 
 LOG = logger(__name__)
@@ -24,7 +27,8 @@ def safe(safe_return_value=None, log=LOG):
             try:
                 return function(*args, **kwargs)
             except Exception as e:
-                log.exception(e)
+                tb = traceback.format_exc().replace('\n', '->')
+                log.error('event=safe_handling, message=%s, traceback=%s', str(e), tb)
             return safe_return_value
         return internal
     return wrap

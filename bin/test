@@ -2,6 +2,6 @@
 
 set -e
 
-pycodestyle *.py test/*.py
+pycodestyle
 
 python3 -m unittest test/*.py
