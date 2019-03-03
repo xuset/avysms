@@ -47,6 +47,7 @@ class ProblemType(Enum):
     PersistentSlab = "PersistentSlab"
     WindSlab = "WindSlab"
     LooseWet = "LooseWet"
+    StormSlab = "StormSlab"
 
 
 class Zone(Enum):
