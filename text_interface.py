@@ -6,7 +6,7 @@ from forecast import Zone
 from utils import safe, logger
 from download_caic_html import download_html
 from caic_html_to_forecast import parse_forecast
-from forecast_to_text import convert_forecast_to_text
+from forecast_to_text import forecast_to_text
 
 LOG = logger(__name__)
 
@@ -52,7 +52,7 @@ def do_command(text):
             zone = CAIC_ZONES_IDS_TO_ZONES.get(zone_id, None)
             html = download_html(zone_id)
             forecast = parse_forecast(html, zone)
-            return convert_forecast_to_text(forecast)
+            return forecast_to_text(forecast)
     return HELP_TEXT
 
 

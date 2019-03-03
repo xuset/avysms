@@ -1,6 +1,6 @@
-import jsonpickle
-import json
 from enum import Enum
+
+from utils import Data
 
 
 class AspectType(Enum):
@@ -61,21 +61,6 @@ class Zone(Enum):
     NorthSanJuan = "NorthSanJuan"
     SouthSanJuan = "SouthSanJuan"
     SangreDeCristo = "SangreDeCristo"
-
-
-class Data(object):
-    def __str__(self):
-        return str(dict(self))
-
-    def __iter__(self):
-        return iter(json.loads(jsonpickle.encode(self, unpicklable=False)).items())
-
-    def to_json(self):
-        return jsonpickle.encode(self)
-
-    @staticmethod
-    def from_json(json_str):
-        return jsonpickle.decode(json_str if not hasattr(json_str, 'read') else json_str.read())
 
 
 class Danger(Data):

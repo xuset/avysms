@@ -1,6 +1,8 @@
-import traceback
+import json
+import jsonpickle
 import logging
 import sys
+import traceback
 
 
 def logger(name):
@@ -32,3 +34,18 @@ def safe(safe_return_value=None, log=LOG):
             return safe_return_value
         return internal
     return wrap
+
+
+class Data(object):
+    def __str__(self):
+        return str(dict(self))
+
+    def __iter__(self):
+        return iter(json.loads(jsonpickle.encode(self, unpicklable=False)).items())
+
+    def to_json(self):
+        return jsonpickle.encode(self)
+
+    @staticmethod
+    def from_json(json_str):
+        return jsonpickle.decode(json_str if not hasattr(json_str, 'read') else json_str.read())
