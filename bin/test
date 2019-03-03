@@ -1,0 +1,7 @@
+#!/bin/bash
+
+set -e
+
+pycodestyle *.py test/*.py
+
+python3 -m unittest test/*.py
