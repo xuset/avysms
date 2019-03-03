@@ -101,7 +101,8 @@ class Warning(Data):
 
 
 class Forecast(Data):
-    def __init__(self, zone, date, description, problems, warnings, dangers):
+    def __init__(self, zone=None, date=None, description=None, problems=[],
+                 warnings=[], dangers=[]):
         self.zone = zone
         self.date = date
         self.description = description

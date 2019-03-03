@@ -140,14 +140,18 @@ def convert_all_dangers_to_text(dangers):
 
 
 @safe(safe_return_value="Error retrieving forecast", log=LOG)
-def convert_forecast_to_text(forecast):
-    return '\n\n'.join(filter(is_not_None, [
+def convert_forecast_to_text(forecast, max_characters=1500):
+    text = '\n\n'.join(filter(is_not_None, [
         " - ".join(filter(is_not_None, [ZONE_TO_TEXT.get(forecast.zone, None), forecast.date])),
         convert_all_dangers_to_text(forecast.dangers),
         forecast.description,
         *map(convert_problem_to_text, forecast.problems),
         convert_all_warnings_to_text(forecast.warnings)
     ]))
+    if len(text) > max_characters:
+        pad = "..."
+        text = text[0:max_characters - len(pad)] + pad
+    return text
 
 
 if __name__ == "__main__":
