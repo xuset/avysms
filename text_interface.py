@@ -3,11 +3,12 @@
 import sys
 
 from forecast import Zone
-from utils import safe
+from utils import safe, logger
 from download_caic_html import download_html
 from caic_html_to_forecast import parse_forecast
 from forecast_to_text import convert_forecast_to_text
 
+LOG = logger(__name__)
 
 CAIC_ZONES_IDS = {
   "Steamboat & Flat Tops": 0,
@@ -36,12 +37,13 @@ CAIC_ZONES_IDS_TO_ZONES = {
 }
 
 HELP_TEXT = "\n".join([
-"This is an automated avalanche forecast service for Colorado.",
-"Reply with one of the available regions to receive the latest forecast:",
-"",
-] + list(CAIC_ZONES_IDS.keys()))
+  "This is an automated avalanche forecast service for Colorado.",
+  "Reply with one of the available regions to receive the latest forecast:",
+  "",
+  *CAIC_ZONES_IDS.keys()
+])
 
-@safe(safe_return_value=HELP_TEXT)
+@safe(safe_return_value=HELP_TEXT, log=LOG)
 def do_command(text):
   text = text.split(' ')[0]
   for zone_name, zone_id in CAIC_ZONES_IDS.items():

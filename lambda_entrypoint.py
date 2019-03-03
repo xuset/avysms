@@ -4,9 +4,12 @@ import json
 import sys
 
 from text_interface import do_command
+from utils import logger
+
+LOG = logger(__name__)
 
 def lambda_handler(event, context):
-  print('event=lambda_invoked, lambda_event={}, lambda_context={}'.format(event, context), file=sys.stderr)
+  LOG.info('event=lambda_invoked, lambda_event=%s, lambda_context=%s', event, context)
   request_body = event["queryStringParameters"]["Body"]
   result = {
     "statusCode": 200,
@@ -15,7 +18,7 @@ def lambda_handler(event, context):
     },
     "body": do_command(request_body)
   }
-  print('event=lambda_return, result={}'.format(result), file=sys.stderr)
+  LOG.info('event=lambda_return, result=%s', result)
   return result
 
 if __name__ == "__main__":

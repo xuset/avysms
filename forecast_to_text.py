@@ -5,7 +5,9 @@ import json
 
 from forecast import Forecast, LikelihoodType, ProblemType, ElevationType, AspectType, \
                      Zone, DangerType
-from utils import is_not_None, safe
+from utils import is_not_None, safe, logger
+
+LOG = logger(__name__)
 
 ZONE_TO_TEXT = {
   Zone.Steamboat.name: "Steamboat & Flat Tops",
@@ -64,7 +66,7 @@ DANGER_TYPE_TO_TEXT = {
   DangerType.Extreme.name: 'extreme',
 }
 
-@safe(safe_return_value="Error retrieving forecast elevation data")
+@safe(safe_return_value="Error retrieving forecast elevation data", log=LOG)
 def convert_problem_rose_elevation_to_text(elevation, problem_rose_elevation):
   aspect_entries = list(problem_rose_elevation.items())
   aspect_entries.sort(key=lambda e: ASPECT_ORDER[e[0]])
@@ -72,7 +74,7 @@ def convert_problem_rose_elevation_to_text(elevation, problem_rose_elevation):
   aspect_entries = map(lambda e: e[0], aspect_entries)
   return "    " + ELEVATIONS_TO_TEXT.get(elevation, "") + ": " + " ".join(aspect_entries)
 
-@safe(safe_return_value="")
+@safe(safe_return_value="", log=LOG)
 def convert_problem_rose_to_text(problem_rose):
   elevation_entries = list(problem_rose.items())
   elevation_entries.sort(key=lambda e: ELEVATION_ORDER[e[0]])
@@ -80,7 +82,7 @@ def convert_problem_rose_to_text(problem_rose):
   elevation_entries = filter(is_not_None, elevation_entries)
   return "\n".join(elevation_entries)
 
-@safe(safe_return_value="Error retrieving forecast problems")
+@safe(safe_return_value="Error retrieving forecast problems", log=LOG)
 def convert_problem_to_text(problem):
   return "".join([
     "There is a ",
@@ -92,7 +94,7 @@ def convert_problem_to_text(problem):
     convert_problem_rose_to_text(problem.rose)
   ])
 
-@safe(safe_return_value="Avalanche warning:")
+@safe(safe_return_value="Avalanche warning:", log=LOG)
 def convert_warning_title_to_text(warning):
   return (
     " ".join(filter(is_not_None, [
@@ -100,21 +102,21 @@ def convert_warning_title_to_text(warning):
       "expires on " + warning.expires if warning.expires is not None else None]))
     + ":")
 
-@safe()
+@safe(log=LOG)
 def convert_warning_to_text(warning):
   return "\n".join([
     convert_warning_title_to_text(warning),
     warning.description])
 
-@safe("Unable to retrieve avalanche watches")
+@safe(safe_return_value="Unable to retrieve avalanche watches", log=LOG)
 def convert_all_warnings_to_text(warnings):
   return "\n\n".join(map(convert_warning_to_text, warnings))
 
-@safe()
+@safe(log=LOG)
 def convert_danger_to_text(danger):
   return "     " + ELEVATIONS_TO_TEXT[danger.elevation] + ": " + DANGER_TYPE_TO_TEXT[danger.danger_type]
 
-@safe()
+@safe(log=LOG)
 def convert_all_dangers_to_text(dangers):
   dangers.sort(key=lambda d: ELEVATION_ORDER[d.elevation])
   return "\n".join(filter(is_not_None, [
@@ -122,7 +124,7 @@ def convert_all_dangers_to_text(dangers):
     *map(convert_danger_to_text, dangers)
   ]))
 
-@safe(safe_return_value="Error retrieving forecast")
+@safe(safe_return_value="Error retrieving forecast", log=LOG)
 def convert_forecast_to_text(forecast):
   return '\n\n'.join(filter(is_not_None, [
     " - ".join(filter(is_not_None, [ZONE_TO_TEXT.get(forecast.zone, None), forecast.date])),
@@ -134,6 +136,5 @@ def convert_forecast_to_text(forecast):
 
 if __name__ == "__main__":
   forecast = Forecast.from_json(sys.stdin)
-  sys.stdout.write(convert_forecast_to_text(forecast))
-  sys.stdout.flush()
+  print(convert_forecast_to_text(forecast), end='')
   
