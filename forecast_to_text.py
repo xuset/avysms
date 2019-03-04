@@ -4,6 +4,7 @@ import argparse
 import json
 import sys
 
+from functools import reduce
 from enum import Enum
 
 from forecast import Forecast, LikelihoodType, ProblemType, ElevationType, AspectType, \
@@ -204,9 +205,22 @@ def forecast_to_message_parts(forecast):
     return list(message_parts)
 
 
+def segment_reducer(new_segments, current_segment):
+    join_str = "\n\n"
+    if len(new_segments) == 0:
+        new_segments.append(current_segment)
+    elif len(current_segment) + len(new_segments[-1]) + len(join_str) < MAX_SGEMENT_CHARS:
+        new_segments[-1] = join_str.join([new_segments[-1], current_segment])
+    else:
+        new_segments.append(current_segment)
+    return new_segments
+
+
 @safe(log=LOG)
 def message_parts_to_segments(message_parts):
+    join_str = "\n\n"
     segments = map(lambda part: part.text, message_parts)
+    segments = reduce(segment_reducer, segments, [])
     return list(segments)
 
 
@@ -229,25 +243,28 @@ def forecast_to_segments(forecast, short):
     return segments
 
 
-@safe(safe_return_value="Error retrieving forecast", log=LOG)
-def forecast_to_text(forecast, short=False):
+@safe(safe_return_value=["Error retrieving forecast"], log=LOG)
+def forecast_to_text(forecast, short=False, segmented=False):
     segments = forecast_to_segments(forecast, short)
+
+    if segmented:
+        return segments
 
     text = "\n\n".join(segments)
     if len(text) > MAX_SEGMENTS * MAX_SGEMENT_CHARS:
         pad = "..."
         text = text[0:MAX_SEGMENTS * MAX_SGEMENT_CHARS - len(pad)] + pad
-    return text
+    return [text]
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-s", "--short", action="store_true")
-    parser.add_argument("-p", "--parts", action="store_true")
+    parser.add_argument("--segments", action="store_true")
     args = parser.parse_args()
 
     forecast = Forecast.from_json(sys.stdin)
-    if args.parts:
+    if args.segments:
         json.dump(forecast_to_segments(forecast, args.short), sys.stdout, indent=4)
     else:
-        print(forecast_to_text(forecast, args.short), end='')
+        print(forecast_to_text(forecast, args.short)[0], end='')

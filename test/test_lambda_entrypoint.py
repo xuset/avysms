@@ -15,7 +15,7 @@ class TestForecastToText(unittest.TestCase):
             }
         }
         response = lambda_handler(event, None)
-        self.assertIn('This is an automated avalanche', response["body"])
+        self.assertIn('This is an automated text message', response["body"])
         self.assertIn('Sangre de Cristo', response["body"])
 
     def test_lambda_handler__request_has_zone__returns_forecast(self):

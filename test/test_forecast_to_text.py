@@ -14,10 +14,12 @@ class TestForecastToText(unittest.TestCase):
     def test_forecast_to_text(self):
         forecast = Forecast.from_json(read_file('./test/fixtures/sangre.json'))
         actual_text = forecast_to_text(forecast)
+        self.assertEqual(1, len(actual_text))
         expected_text = read_file('./test/fixtures/sangre.txt')
-        self.assertEqual(expected_text, actual_text)
+        self.assertEqual(expected_text, actual_text[0])
 
     def test_forecast_to_text__large_forecast__is_shortened(self):
         forecast = Forecast(description="a" * 2000)
         text = forecast_to_text(forecast)
-        self.assertEqual(MAX_SEGMENTS * MAX_SGEMENT_CHARS, len(text))
+        self.assertEqual(1, len(text))
+        self.assertEqual(MAX_SEGMENTS * MAX_SGEMENT_CHARS, len(text[0]))
