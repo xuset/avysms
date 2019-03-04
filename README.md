@@ -4,6 +4,20 @@
 
 This repo is the code for the backend of avysms.com. It provides the ability to download Colorado Avalanche Information Center (CAIC) webpages, parse them, and convert them to human readable text so that it can be sent via sms.
 
+## Setup
+
+Setup the python3 virtual environment and install dependencies
+
+`make install`
+
+Activate the virtual environment
+
+`source ./venv/bin/activate`
+
+Run the tests
+
+`make test`
+
 ## Usage
 
 #### `download_caic_html.py [-z ZONE_ID]`
