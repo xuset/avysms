@@ -57,6 +57,7 @@ def do_command(request):
             html = download_html(zone_id)
             forecast = parse_forecast(html, zone)
             return forecast_to_text(forecast, short=short, segmented=short)
+    LOG.warning("event=unknown_request, request=%s", request)
     return [HELP_TEXT]
 
 
