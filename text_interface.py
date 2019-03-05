@@ -43,13 +43,13 @@ HELP_TEXT = "\n".join([
     *CAIC_ZONES_IDS.keys(),
     "",
     "Reply with one of the available regions to receive the latest forecast.",
-    "Add the word 'short' to receive a shortened variation"
+    "Add the word 'long' to recieve more forecast information"
 ])
 
 
 @safe(safe_return_value=[HELP_TEXT], log=LOG)
 def do_command(request):
-    short = 'short' in request
+    short = 'long' not in request
     request_region = request.split(' ')[0]
     for zone_name, zone_id in CAIC_ZONES_IDS.items():
         if zone_name.lower().startswith(request_region.lower()):
