@@ -55,8 +55,8 @@ def parse_forecast_date(forecast_root):
 
 @safe(log=LOG)
 def parse_forecast_description(forecast_root):
-    return forecast_root.find("div", attrs={"class": "fx-text-area"}) \
-        .find("p").string.replace("\u00a0", "")
+    return "".join(forecast_root.find("div", attrs={"class": "fx-text-area"}).strings) \
+        .replace("\u00a0", "").strip()
 
 
 @safe(log=LOG)
