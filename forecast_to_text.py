@@ -95,17 +95,18 @@ class MessagePart(Data):
         self.text = text
 
 
-LONG_MESSAGE_FILTER_LIST = [
+LONG_MESSAGE_PART_LIST = [
     MessagePartType.Header,
     MessagePartType.Danger,
-    MessagePartType.Description,
     MessagePartType.Problem,
-    MessagePartType.Warning
+    MessagePartType.Warning,
+    MessagePartType.Description,
 ]
 
 
-SHORT_MESSAGE_FILTER_LIST = [
+SHORT_MESSAGE_PART_LIST = [
     MessagePartType.Header,
+    MessagePartType.Warning,
     MessagePartType.Danger,
     MessagePartType.Problem
 ]
@@ -152,10 +153,12 @@ def convert_warning_title_to_text(warning):
 
 
 @safe(log=LOG)
-def convert_warning_to_text(warning):
-    return "\n".join([
-        convert_warning_title_to_text(warning),
-        warning.description])
+def convert_warning_to_text(warning, short):
+    title = convert_warning_title_to_text(warning)
+    if short:
+        return title
+    else:
+        return "\n".join([title, warning.description])
 
 
 # TODO Unused?
@@ -191,14 +194,14 @@ def convert_header_to_text(forecast):
 
 
 @safe(log=LOG)
-def forecast_to_message_parts(forecast):
+def forecast_to_message_parts(forecast, short):
     message_parts = [
         MessagePart(MessagePartType.Header, convert_header_to_text(forecast)),
         MessagePart(MessagePartType.Danger, convert_all_dangers_to_text(forecast.dangers)),
         MessagePart(MessagePartType.Description, forecast.description),
         *[MessagePart(MessagePartType.Problem, convert_problem_to_text(p))
             for p in forecast.problems],
-        *[MessagePart(MessagePartType.Warning, convert_warning_to_text(w))
+        *[MessagePart(MessagePartType.Warning, convert_warning_to_text(w, short))
             for w in forecast.warnings],
     ]
     message_parts = filter(lambda part: part.text is not None, message_parts)
@@ -231,10 +234,12 @@ def filter_non_gsm_chars(text):
 
 @safe(log=LOG)
 def forecast_to_segments(forecast, short):
-    filter_list = SHORT_MESSAGE_FILTER_LIST if short else LONG_MESSAGE_FILTER_LIST
+    filter_list = SHORT_MESSAGE_PART_LIST if short else LONG_MESSAGE_PART_LIST
 
-    message_parts = forecast_to_message_parts(forecast)
+    message_parts = forecast_to_message_parts(forecast, short)
     message_parts = filter(lambda part: part.part_type in filter_list, message_parts)
+    message_parts = list(message_parts)
+    message_parts.sort(key=lambda part: filter_list.index(part.part_type))
     message_parts = map(lambda part:
                         MessagePart(part.part_type, filter_non_gsm_chars(part.text)),
                         message_parts)
