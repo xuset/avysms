@@ -37,12 +37,12 @@ CAIC_ZONES_IDS_TO_ZONES = {
 }
 
 HELP_TEXT = "\n".join([
-    "This is an automated text message service for retrieving avalanche forecasts",
+    "This is an automated text message service for retrieving avalanche forecasts.",
+    "Reply with one of the available regions to receive the latest forecast.",
     "",
     "Available regions:",
     *CAIC_ZONES_IDS.keys(),
     "",
-    "Reply with one of the available regions to receive the latest forecast.",
     "Add the word 'long' to recieve more forecast information"
 ])
 
