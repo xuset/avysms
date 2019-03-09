@@ -50,7 +50,7 @@ HELP_TEXT = "\n".join([
 @safe(safe_return_value=[HELP_TEXT], log=LOG)
 def do_command(request):
     short = 'long' not in request
-    request_region = request.split(' ')[0]
+    request_region = request.split(' ')[0][:4]
     for zone_name, zone_id in CAIC_ZONES_IDS.items():
         if zone_name.lower().startswith(request_region.lower()):
             zone = CAIC_ZONES_IDS_TO_ZONES.get(zone_id, None)
