@@ -7,7 +7,7 @@ PIP          = ./venv/bin/pip3
 LIVEREQUEST_URL = https://kq3r8wthij.execute-api.us-west-2.amazonaws.com/default/avysms-entrypoint
 LIVEREQUEST_BODY = sangre
 
-.PHONY: install freeze style test bundle deploy venv liverequest
+.PHONY: install freeze style test bundle deploy venv liverequest require_clean_git
 
 
 install:
@@ -33,7 +33,7 @@ bundle: test
 	zip -r $(BUNDLE_PATH) ./*
 
 
-deploy: bundle
+deploy: require_clean_git bundle
 	aws lambda update-function-code \
 		--function-name "$(LAMBDA_NAME)" \
 		--zip-file "fileb://$(BUNDLE_PATH)"
@@ -42,3 +42,6 @@ deploy: bundle
 liverequest:
 	curl --silent -X GET "$(LIVEREQUEST_URL)?Body=$(LIVEREQUEST_BODY)"
 
+
+require_clean_git:
+	git diff-index --quiet HEAD -- # Git repo is not clean
