@@ -7,7 +7,7 @@ import jsonpickle
 from bs4 import BeautifulSoup
 
 from forecast import Forecast, ElevationType, AspectType, ProblemType, LikelihoodType, \
-    Problem, Zone, DangerType
+    Problem, Zone, DangerType, SizeType
 from utils import safe, is_not_None, logger
 
 LOG = logger(__name__)
@@ -47,6 +47,16 @@ DANGER_ID_TO_NAME = {
     'extreme': DangerType.Extreme,
 }
 
+SIZE_ID_TO_NAME = {
+    'small': SizeType.Small.name,
+    'small-large': SizeType.SmallToLarge.name,
+    'large': SizeType.Large.name,
+    'large-vlarge': SizeType.LargeToVeryLarge.name,
+    'vlarge': SizeType.VeryLarge.name,
+    'vlarge-historic': SizeType.VeryLargeToHistoric.name,
+    'historic': SizeType.Historic.name
+}
+
 
 @safe(log=LOG)
 def parse_forecast_date(forecast_root):
@@ -75,13 +85,20 @@ def parse_problem_likelihood(problem_root):
 
 @safe(log=LOG)
 def parse_problem_size(problem_root):
-    return None  # TODO implement problem size parsing
+    id_regex = re.compile("avi_size_\d+")
+    size_root = problem_root.find(id=id_regex)
+    return next(
+        filter(
+            is_not_None,
+            map(
+                lambda cls: SIZE_ID_TO_NAME.get(cls, None),
+                size_root.get_attribute_list("class"))))
 
 
 @safe(log=LOG)
 def is_elevation_aspect_problematic(rose_root, elevation, aspect):
     elevation_class = ELEVATION_TYPE_TO_PROBLEM_ELEVATION_ID[elevation]
-    id_regex = re.compile(aspect.value + elevation_class + r"_\d")
+    id_regex = re.compile(aspect.value + elevation_class + r"_\d+")
     return 'on' in rose_root.find(id=id_regex).get_attribute_list("class")
 
 

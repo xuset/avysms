@@ -30,9 +30,12 @@ class LikelihoodType(Enum):
 
 class SizeType(Enum):
     Small = 0
-    Large = 1
-    VeryLarge = 2
-    Historic = 3
+    SmallToLarge = 1
+    Large = 2
+    LargeToVeryLarge = 3
+    VeryLarge = 4
+    VeryLargeToHistoric = 5
+    Historic = 6
 
 
 class DangerType(Enum):

@@ -8,7 +8,7 @@ from functools import reduce
 from enum import Enum
 
 from forecast import Forecast, LikelihoodType, ProblemType, ElevationType, AspectType, \
-    Zone, DangerType
+    Zone, DangerType, SizeType
 from utils import is_not_None, safe, logger, Data
 
 
@@ -40,6 +40,16 @@ LIKELYHOOD_TO_TEXT = {
     LikelihoodType.Possible.name: "possible",
     LikelihoodType.Likely.name: "likely",
     LikelihoodType.VeryLikely.name: "very likely",
+}
+
+SIZE_TO_TEXT = {
+    SizeType.Small.name: "small",
+    SizeType.SmallToLarge.name: "large",
+    SizeType.Large.name: "large",
+    SizeType.LargeToVeryLarge.name: "very large",
+    SizeType.VeryLarge.name: "very large",
+    SizeType.VeryLargeToHistoric.name: "historic",
+    SizeType.Historic.name: "historic",
 }
 
 PROBLEM_TYPE_TO_TEXT = {
@@ -136,6 +146,8 @@ def convert_problem_to_text(problem):
         "There is a ",
         LIKELYHOOD_TO_TEXT.get(problem.likelyhood, ""),
         " ",
+        SIZE_TO_TEXT.get(problem.size, ""),
+        " ",
         PROBLEM_TYPE_TO_TEXT.get(problem.problem_type, "unknown"),
         " avalanche problem",
         "\n",
@@ -159,12 +171,6 @@ def convert_warning_to_text(warning, short):
         return title
     else:
         return "\n".join([title, warning.description])
-
-
-# TODO Unused?
-@safe(safe_return_value="Unable to retrieve avalanche watches", log=LOG)
-def convert_all_warnings_to_text(warnings):
-    return "\n\n".join(map(convert_warning_to_text, warnings))
 
 
 @safe(log=LOG)
@@ -223,7 +229,12 @@ def segment_reducer(new_segments, current_segment):
 def message_parts_to_segments(message_parts):
     join_str = "\n\n"
     segments = map(lambda part: part.text, message_parts)
-    segments = reduce(segment_reducer, segments, [])
+    segments = list(reduce(segment_reducer, segments, []))
+
+    for s in segments:
+        if len(s) > MAX_SGEMENT_CHARS:
+            LOG.warning("event=segment_too_large, segmentSize=%d", len(s))
+
     return list(segments)
 
 
