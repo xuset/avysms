@@ -166,12 +166,12 @@ def convert_warning_title_to_text(warning):
 
 
 @safe(log=LOG)
-def convert_warning_to_text(warning, short):
+def convert_warning_to_text(warning, long):
     title = convert_warning_title_to_text(warning)
-    if short:
-        return title
-    else:
+    if long:
         return "\n".join([title, warning.description])
+    else:
+        return title
 
 
 @safe(log=LOG)
@@ -201,14 +201,14 @@ def convert_header_to_text(forecast):
 
 
 @safe(log=LOG)
-def forecast_to_message_parts(forecast, short):
+def forecast_to_message_parts(forecast, long):
     message_parts = [
         MessagePart(MessagePartType.Header, convert_header_to_text(forecast)),
         MessagePart(MessagePartType.Danger, convert_all_dangers_to_text(forecast.dangers)),
         MessagePart(MessagePartType.Description, forecast.description),
         *[MessagePart(MessagePartType.Problem, convert_problem_to_text(p))
             for p in forecast.problems],
-        *[MessagePart(MessagePartType.Warning, convert_warning_to_text(w, short))
+        *[MessagePart(MessagePartType.Warning, convert_warning_to_text(w, long))
             for w in forecast.warnings],
     ]
     message_parts = filter(lambda part: part.text is not None, message_parts)
@@ -245,10 +245,10 @@ def filter_non_gsm_chars(text):
 
 
 @safe(log=LOG)
-def forecast_to_segments(forecast, short):
-    filter_list = SHORT_MESSAGE_PART_LIST if short else LONG_MESSAGE_PART_LIST
+def forecast_to_segments(forecast, long):
+    filter_list = LONG_MESSAGE_PART_LIST if long else SHORT_MESSAGE_PART_LIST
 
-    message_parts = forecast_to_message_parts(forecast, short)
+    message_parts = forecast_to_message_parts(forecast, long)
     message_parts = filter(lambda part: part.part_type in filter_list, message_parts)
     message_parts = list(message_parts)
     message_parts.sort(key=lambda part: filter_list.index(part.part_type))
@@ -261,11 +261,8 @@ def forecast_to_segments(forecast, short):
 
 
 @safe(safe_return_value=["Error retrieving forecast"], log=LOG)
-def forecast_to_text(forecast, short=False, segmented=False):
-    segments = forecast_to_segments(forecast, short)
-
-    if segmented:
-        return segments
+def forecast_to_text(forecast, long):
+    segments = forecast_to_segments(forecast, long)
 
     text = "\n\n".join(segments)
     if len(text) > MAX_SEGMENTS * MAX_SGEMENT_CHARS:
@@ -276,12 +273,12 @@ def forecast_to_text(forecast, short=False, segmented=False):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-s", "--short", action="store_true")
-    parser.add_argument("--segments", action="store_true")
+    parser.add_argument("-l", "--long", action="store_true")
+    parser.add_argument("-u", "--unsegmented", action="store_true")
     args = parser.parse_args()
 
     forecast = Forecast.from_json(sys.stdin)
-    if args.segments:
-        json.dump(forecast_to_segments(forecast, args.short), sys.stdout, indent=4)
+    if args.unsegmented:
+        print(forecast_to_text(forecast, args.long)[0], end='')
     else:
-        print(forecast_to_text(forecast, args.short)[0], end='')
+        json.dump(forecast_to_segments(forecast, args.long), sys.stdout, indent=4)
