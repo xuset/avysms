@@ -144,9 +144,10 @@ def convert_problem_rose_to_text(problem_rose):
 def convert_problem_to_text(problem):
     return "".join([
         "There is a ",
-        LIKELYHOOD_TO_TEXT.get(problem.likelyhood, ""),
-        " ",
-        SIZE_TO_TEXT.get(problem.size, ""),
+        " ".join(filter(is_not_None, [
+            LIKELYHOOD_TO_TEXT.get(problem.likelyhood, None),
+            SIZE_TO_TEXT.get(problem.size, None)
+        ])),
         " ",
         PROBLEM_TYPE_TO_TEXT.get(problem.problem_type, "unknown"),
         " avalanche problem",

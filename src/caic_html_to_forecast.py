@@ -85,7 +85,7 @@ def parse_problem_likelihood(problem_root):
 
 @safe(log=LOG)
 def parse_problem_size(problem_root):
-    id_regex = re.compile("avi_size_\d+")
+    id_regex = re.compile(r"avi_size_\d+")
     size_root = problem_root.find(id=id_regex)
     return next(
         filter(
