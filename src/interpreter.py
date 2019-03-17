@@ -48,7 +48,7 @@ HELP_TEXT = "\n".join([
 
 
 @safe(safe_return_value=[HELP_TEXT], log=LOG)
-def do_command(request):
+def interpret(request):
     long = 'long' in request
     request_region = request.split(' ')[0][:4]
     for zone_name, zone_id in CAIC_ZONES_IDS.items():
@@ -65,4 +65,4 @@ def do_command(request):
 
 
 if __name__ == "__main__":
-    print("\n\n".join(do_command(" ".join(sys.argv[1:]))))
+    print("\n\n".join(interpret(" ".join(sys.argv[1:]))))

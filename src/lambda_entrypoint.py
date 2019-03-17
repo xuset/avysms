@@ -5,7 +5,7 @@ import sys
 
 from twilio.twiml.messaging_response import Message, MessagingResponse
 
-from text_interface import do_command
+from interpreter import interpret
 from utils import logger, safe
 
 LOG = logger(__name__)
@@ -28,7 +28,7 @@ def lambda_handler(event, context):
         "headers": {
             "Content-Type": "application/xml"
         },
-        "body": str(messages_to_twiml(do_command(request_body)))
+        "body": str(messages_to_twiml(interpret(request_body)))
     }
     LOG.info('event=lambda_return, result=%s', result)
     return result
