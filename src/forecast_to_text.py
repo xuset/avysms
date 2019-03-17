@@ -60,9 +60,9 @@ PROBLEM_TYPE_TO_TEXT = {
 }
 
 ELEVATIONS_TO_TEXT = {
-    ElevationType.BelowTreeline.name: "Below treeline",
-    ElevationType.Treeline.name: "Treeline",
-    ElevationType.AboveTreeline.name: "Above treeline",
+    ElevationType.BelowTreeline.name: "Below TL",
+    ElevationType.Treeline.name: "Near  TL",
+    ElevationType.AboveTreeline.name: "Above TL",
 }
 
 ELEVATION_ORDER = {
@@ -83,11 +83,11 @@ ASPECT_ORDER = {
 }
 
 DANGER_TYPE_TO_TEXT = {
-    DangerType.Low.name: 'low',
-    DangerType.Moderate.name: 'moderate',
-    DangerType.Considerable.name: 'considerable',
-    DangerType.High.name: 'high',
-    DangerType.Extreme.name: 'extreme',
+    DangerType.Low.name: 'Low',
+    DangerType.Moderate.name: 'Moderate',
+    DangerType.Considerable.name: 'Considerable',
+    DangerType.High.name: 'High',
+    DangerType.Extreme.name: 'Extreme',
 }
 
 
@@ -143,11 +143,10 @@ def convert_problem_rose_to_text(problem_rose):
 @safe(safe_return_value="Error retrieving forecast problems", log=LOG)
 def convert_problem_to_text(problem):
     return "".join([
-        "There is a ",
         " ".join(filter(is_not_None, [
             LIKELYHOOD_TO_TEXT.get(problem.likelyhood, None),
             SIZE_TO_TEXT.get(problem.size, None)
-        ])),
+        ])).capitalize(),
         " ",
         PROBLEM_TYPE_TO_TEXT.get(problem.problem_type, "unknown"),
         " avalanche problem",
@@ -188,7 +187,7 @@ def convert_danger_to_text(danger):
 def convert_all_dangers_to_text(dangers):
     dangers.sort(key=lambda d: ELEVATION_ORDER[d.elevation])
     return "\n".join(filter(is_not_None, [
-        "Avalanche dangers:",
+        "Avalanche dangers",
         *map(convert_danger_to_text, dangers)
     ]))
 
