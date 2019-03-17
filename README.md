@@ -20,27 +20,25 @@ Run the tests
 
 ## Usage
 
-#### `download_caic_html.py [-z ZONE_ID]`
-Downloads the html for the CIAC forecast for the given region
+#### `python3 src/interpreter.py`
+Starts the interperter that is used to interpret incoming sms requests and respond with the approrpriate forecast
 
-#### `caic_html_to_forecast.py`
-Parsers the html forecast into an intermediary data structure represented as json
+##### Example
+```bash
+# python3 src/interpreter.py
+> front range
+Front Range - Sat, Mar 16, 2019 at 7:30 AM
 
-#### `forecast_to_text.py`
-Converts the intermediary json data structure to human readable forecast_to_text
+Avalanche dangers
+  Below TL: Moderate
+  Near  TL: Considerable
+  Above TL: Considerable
 
-## Example
+Likely historic persistent slab avalanche problem
+  Below TL: N NE E SE S SW W NW
+  Near  TL: N NE E SE S SW W NW
+  Above TL: N NE E SE S SW W NW
 
-#### Chaining it all together:
+ >
 
-`./download_caic_html.py -z 0 | ./caic_html_to_forecast.py | ./forecast_to_text.py`
-
-This downloads the latest forecast for the Steamboat (zone 0) region and converts it to a human readable text response
-
-#### Using the SMS interface
-
-The SMS text interface uses the same flow as described above, downloading the forecast and converting it to human readable text. This interfaces supports additional commands like specifying regions by their name. Its this interface that handles interpreting the sms requests and sending the appropriate sms response.
-
-`text_interface.py [sms message body]`
-
-`./text_interface.py front range`
+```
