@@ -20,8 +20,8 @@ def messages_to_twiml(messages):
     return response
 
 
-def lambda_handler(event, context):
-    LOG.info('event=lambda_invoked, lambda_event=%s, lambda_context=%s', event, context)
+def sms_handler(event, context):
+    LOG.info('event=sms_handler_invoked, lambda_event=%s, lambda_context=%s', event, context)
     request_body = event["queryStringParameters"]["Body"]
     result = {
         "statusCode": 200,
@@ -30,7 +30,14 @@ def lambda_handler(event, context):
         },
         "body": str(messages_to_twiml(interpret(request_body)))
     }
-    LOG.info('event=lambda_return, result=%s', result)
+    LOG.info('event=sms_handler_success, result=%s', result)
+    return result
+
+
+def email_handler(event, context):
+    LOG.info('event=email_handler_invoked, lambda_event=%s, lambda_context=%s', event, context)
+    result = {}
+    LOG.info('event=email_handler_success, result=%s', result)
     return result
 
 
@@ -40,4 +47,4 @@ if __name__ == "__main__":
             "Body": " ".join(sys.argv[1:])
         }
     }
-    json.dump(lambda_handler(event, None), sys.stdout)
+    json.dump(lambda_sms(event, None), sys.stdout)
