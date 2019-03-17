@@ -83,7 +83,7 @@ ASPECT_ORDER = {
 }
 
 DANGER_TYPE_TO_TEXT = {
-    DangerType.NoRating.name: 'Unknown',
+    DangerType.NoRating.name: 'No rating',
     DangerType.Low.name: 'Low',
     DangerType.Moderate.name: 'Moderate',
     DangerType.Considerable.name: 'Considerable',
@@ -123,13 +123,29 @@ SHORT_MESSAGE_PART_LIST = [
 ]
 
 
-@safe(safe_return_value="Error retrieving forecast elevation data", log=LOG)
-def convert_problem_rose_elevation_to_text(elevation, problem_rose_elevation):
+@safe(safe_return_value="Unknown", log=LOG)
+def convert_problem_rose_elevation_aspect_to_text(problem_rose_elevation):
     aspect_entries = list(problem_rose_elevation.items())
     aspect_entries.sort(key=lambda e: ASPECT_ORDER[e[0]])
     aspect_entries = filter(lambda e: e[1] is True or e[1] is None, aspect_entries)
-    aspect_entries = map(lambda e: e[0], aspect_entries)
-    return "  " + ELEVATIONS_TO_TEXT.get(elevation, "") + ": " + " ".join(aspect_entries)
+    aspect_entries = list(map(lambda e: e[0], aspect_entries))
+
+    if len(aspect_entries) == 0:
+        return "Unlikely"
+    else:
+        return " ".join(aspect_entries)
+
+
+@safe(safe_return_value="Error", log=LOG)
+def convert_problem_rose_elevation_name_to_text(elevation):
+    return ELEVATIONS_TO_TEXT[elevation]
+
+
+@safe(safe_return_value="Error retrieving forecast elevation data", log=LOG)
+def convert_problem_rose_elevation_to_text(elevation, problem_rose_elevation):
+    aspect_text = convert_problem_rose_elevation_aspect_to_text(problem_rose_elevation)
+    elevation_name = convert_problem_rose_elevation_name_to_text(elevation)
+    return "  " + elevation_name + ": " + aspect_text
 
 
 @safe(safe_return_value="", log=LOG)

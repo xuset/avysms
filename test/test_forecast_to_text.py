@@ -3,7 +3,8 @@ import unittest
 
 from test.utils import read_file
 from forecast import Forecast
-from forecast_to_text import forecast_to_text, MAX_SEGMENTS, MAX_SGEMENT_CHARS
+from forecast_to_text import forecast_to_text, convert_problem_rose_elevation_aspect_to_text, \
+                             MAX_SEGMENTS, MAX_SGEMENT_CHARS
 
 
 class TestForecastToText(unittest.TestCase):
@@ -29,3 +30,8 @@ class TestForecastToText(unittest.TestCase):
         actual_text = forecast_to_text(forecast, long=False)
         expected_text = read_file('./test/fixtures/unknownrating.txt').strip()
         self.assertEqual(expected_text, actual_text[0].strip())
+
+    def test_convert_problem_rose_elevation_to_text__empty_aspect__outputs_unkown(self):
+        problem_rose_elevation = {"AboveTreeline": {"E": False}}
+        aspect_text = convert_problem_rose_elevation_aspect_to_text(problem_rose_elevation)
+        self.assertEqual("Unknown", aspect_text)
