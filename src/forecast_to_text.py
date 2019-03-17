@@ -83,6 +83,7 @@ ASPECT_ORDER = {
 }
 
 DANGER_TYPE_TO_TEXT = {
+    DangerType.NoRating.name: 'Unknown',
     DangerType.Low.name: 'Low',
     DangerType.Moderate.name: 'Moderate',
     DangerType.Considerable.name: 'Considerable',

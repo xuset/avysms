@@ -39,6 +39,7 @@ class SizeType(Enum):
 
 
 class DangerType(Enum):
+    NoRating = -1
     Low = 0
     Moderate = 1
     Considerable = 2

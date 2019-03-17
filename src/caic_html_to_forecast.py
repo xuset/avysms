@@ -40,6 +40,7 @@ DANGER_ELEVATION_ID_TO_NAME = {
 }
 
 DANGER_ID_TO_NAME = {
+    'norating': DangerType.NoRating,
     'low': DangerType.Low,
     'moderate': DangerType.Moderate,
     'considerable': DangerType.Considerable,

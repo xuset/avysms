@@ -23,3 +23,9 @@ class TestForecastToText(unittest.TestCase):
         text = forecast_to_text(forecast, long=True)
         self.assertEqual(1, len(text))
         self.assertEqual(MAX_SEGMENTS * MAX_SGEMENT_CHARS, len(text[0]))
+
+    def test_forecast_to_text__unknown_danger_rating__converts_to_text(self):
+        forecast = Forecast.from_json(read_file('./test/fixtures/unknownrating.json'))
+        actual_text = forecast_to_text(forecast, long=False)
+        expected_text = read_file('./test/fixtures/unknownrating.txt').strip()
+        self.assertEqual(expected_text, actual_text[0].strip())

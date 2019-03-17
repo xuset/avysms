@@ -1,0 +1,11 @@
+Sat, Mar 16, 2019 at 7:53 AM
+
+Avalanche dangers
+  Below TL: Moderate
+  Near  TL: Considerable
+  Above TL: Unknown
+
+Likely large persistent slab avalanche problem
+  Below TL: N NE E SE S SW W NW
+  Near  TL: N NE E SE S SW W NW
+  Above TL: 
