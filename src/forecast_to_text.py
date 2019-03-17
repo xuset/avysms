@@ -54,6 +54,7 @@ SIZE_TO_TEXT = {
 
 PROBLEM_TYPE_TO_TEXT = {
     ProblemType.PersistentSlab.name: "persistent slab",
+    ProblemType.DeepPersistentSlab.name: "deep persistent slab",
     ProblemType.WindSlab.name: "wind slab",
     ProblemType.LooseWet.name: "loose wet",
     ProblemType.StormSlab.name: "storm slab"

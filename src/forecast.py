@@ -49,6 +49,7 @@ class DangerType(Enum):
 
 class ProblemType(Enum):
     PersistentSlab = "PersistentSlab"
+    DeepPersistentSlab = "DeepPersistentSlab"
     WindSlab = "WindSlab"
     LooseWet = "LooseWet"
     StormSlab = "StormSlab"

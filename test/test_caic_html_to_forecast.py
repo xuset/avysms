@@ -22,3 +22,10 @@ class TestCaicHtmlToForecast(unittest.TestCase):
         expected_forecast = dict(Forecast.from_json(
             read_file('./test/fixtures/unknownrating.json')))
         self.assertEqual(expected_forecast, actual_forecast)
+
+    def test_parse_forecast__deep_persistent_slab__parses(self):
+        actual_forecast = dict(parse_forecast(
+            read_file('./test/fixtures/deeppersistentslab.html')))
+        expected_forecast = dict(Forecast.from_json(
+            read_file('./test/fixtures/deeppersistentslab.json')))
+        self.assertEqual(expected_forecast, actual_forecast)

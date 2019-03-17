@@ -13,10 +13,11 @@ from utils import safe, is_not_None, logger
 LOG = logger(__name__)
 
 PROBLEM_TYPE_ID_TO_TYPE = {
-    117: ProblemType.PersistentSlab,
-    116: ProblemType.LooseWet,
+    113: ProblemType.StormSlab,
     114: ProblemType.WindSlab,
-    113: ProblemType.StormSlab
+    116: ProblemType.LooseWet,
+    117: ProblemType.PersistentSlab,
+    118: ProblemType.DeepPersistentSlab
 }
 
 PROBLEM_LIKELIHOOD_ID_TO_TYPE = {
