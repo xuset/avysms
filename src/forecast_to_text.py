@@ -57,7 +57,9 @@ PROBLEM_TYPE_TO_TEXT = {
     ProblemType.DeepPersistentSlab.name: "deep persistent slab",
     ProblemType.WindSlab.name: "wind slab",
     ProblemType.LooseWet.name: "loose wet",
-    ProblemType.StormSlab.name: "storm slab"
+    ProblemType.StormSlab.name: "storm slab",
+    ProblemType.LooseDry.name: "loose dry",
+    ProblemType.WetSlab.name: "wet slab",
 }
 
 ELEVATIONS_TO_TEXT = {

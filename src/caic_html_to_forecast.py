@@ -15,9 +15,11 @@ LOG = logger(__name__)
 PROBLEM_TYPE_ID_TO_TYPE = {
     113: ProblemType.StormSlab,
     114: ProblemType.WindSlab,
+    115: ProblemType.LooseDry,
     116: ProblemType.LooseWet,
     117: ProblemType.PersistentSlab,
-    118: ProblemType.DeepPersistentSlab
+    118: ProblemType.DeepPersistentSlab,
+    119: ProblemType.WetSlab
 }
 
 PROBLEM_LIKELIHOOD_ID_TO_TYPE = {

@@ -52,7 +52,9 @@ class ProblemType(Enum):
     DeepPersistentSlab = "DeepPersistentSlab"
     WindSlab = "WindSlab"
     LooseWet = "LooseWet"
+    LooseDry = "LooseDry"
     StormSlab = "StormSlab"
+    WetSlab = "WetSlab"
 
 
 class Zone(Enum):
