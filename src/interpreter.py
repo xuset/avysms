@@ -65,4 +65,10 @@ def interpret(request):
 
 
 if __name__ == "__main__":
-    print("\n\n".join(interpret(" ".join(sys.argv[1:]))))
+    if len(sys.argv) > 1:
+        print("\n\n".join(interpret(" ".join(sys.argv[1:]))))
+    else:
+        print(" > ", end="", flush=True)
+        for line in sys.stdin:
+            print("\n\n".join(interpret(line)))
+            print("\n > ", end="", flush=True)
