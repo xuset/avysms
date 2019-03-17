@@ -21,7 +21,7 @@ Run the tests
 ## Usage
 
 #### `python3 src/interpreter.py`
-Starts the interperter that is used to interpret incoming sms requests and respond with the approrpriate forecast
+Starts the interperter that is used to interpret incoming sms requests and generate the approrpriate forecast response
 
 ##### Example
 ```bash
