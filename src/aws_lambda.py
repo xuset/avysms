@@ -41,10 +41,17 @@ def email_handler(event, context):
     return result
 
 
+def entrypoint(event, context):
+    if "queryStringParameters" in event:
+        return sms_handler(event, context)
+    else:
+        return email_handler(event, context)
+
+
 if __name__ == "__main__":
     event = {
         "queryStringParameters": {
             "Body": " ".join(sys.argv[1:])
         }
     }
-    json.dump(lambda_sms(event, None), sys.stdout)
+    json.dump(entrypoint(event, None), sys.stdout)
