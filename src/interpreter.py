@@ -10,18 +10,39 @@ from forecast_to_text import forecast_to_text, forecast_to_segments
 
 LOG = logger(__name__)
 
-CAIC_ZONES_IDS = {
-    "Steamboat & Flat Tops": 0,
-    "Front Range": 1,
-    "Vail & Summit County": 2,
-    "Sawatch": 3,
-    "Aspen": 4,
-    "Gunnison": 5,
-    "Grand Mesa": 6,
-    "North San Juan": 7,
-    "South San Juan": 8,
-    "Sangre de Cristo": 9
-}
+CAIC_ZONE_NAMES = [
+    "Steamboat & Flat Tops",
+    "Front Range",
+    "Vail & Summit County",
+    "Sawatch",
+    "Aspen",
+    "Gunnison",
+    "Grand Mesa",
+    "North San Juan",
+    "South San Juan",
+    "Sangre de Cristo"
+]
+
+CAIC_ZONE_MATCHES_TO_IDS = [
+    ("steam", 0),
+    ("flat", 0),
+    ("front", 1),
+    ("vail", 2),
+    ("summit", 2),
+    ("sawatch", 3),
+    ("aspen", 4),
+    ("gunnison", 5),
+    ("grand mesa", 6),
+    ("mesa", 6),
+    ("north san juan", 7),
+    ("north juan", 7),
+    ("south san juan", 8),
+    ("south juan", 8),
+    ("san juan", 7),  # Default to North San Juan if north/south not specifie
+    ("juan", 7),  # Default to North San Juan if north/south not specifie
+    ("sangre", 9)
+]
+
 
 CAIC_ZONES_IDS_TO_ZONES = {
     0: Zone.Steamboat,
@@ -40,16 +61,18 @@ HELP_TEXT = "\n".join([
     "This is an automated text message service for retrieving avalanche forecasts.",
     "Reply with one of the available regions to receive the latest forecast.",
     "",
-    *CAIC_ZONES_IDS.keys(),
+    *CAIC_ZONE_NAMES,
 ])
 
 
 @safe(safe_return_value=[HELP_TEXT], log=LOG)
 def interpret(request):
+    request = request.lower()
+
     long = 'long' in request
-    request_region = request.split(' ')[0][:4]
-    for zone_name, zone_id in CAIC_ZONES_IDS.items():
-        if zone_name.lower().startswith(request_region.lower()):
+
+    for zone_name, zone_id in CAIC_ZONE_MATCHES_TO_IDS:
+        if request.startswith(zone_name):
             zone = CAIC_ZONES_IDS_TO_ZONES.get(zone_id, None)
             html = download_html(zone_id)
             forecast = parse_forecast(html, zone)
@@ -57,6 +80,7 @@ def interpret(request):
                 return forecast_to_text(forecast, long)
             else:
                 return forecast_to_segments(forecast, long)
+
     LOG.warning("event=unknown_request, request=%s", request)
     return [HELP_TEXT]
 
