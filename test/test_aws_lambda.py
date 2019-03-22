@@ -14,7 +14,7 @@ class TestForecastToText(unittest.TestCase):
                 "Body": "foobar"
             }
         }
-        response = sms_handler(event, None)
+        response = sms_handler(event)
         self.assertIn('This is an automated text message', response["body"])
         self.assertIn('Sangre de Cristo', response["body"])
 
@@ -24,6 +24,6 @@ class TestForecastToText(unittest.TestCase):
                 "Body": "sangre"
             }
         }
-        response = sms_handler(event, None)
+        response = sms_handler(event)
         self.assertTrue(len(response["body"]) > 0)
         self.assertIn('Avalanche dangers', response["body"])

@@ -3,49 +3,23 @@
 import json
 import sys
 
-from twilio.twiml.messaging_response import Message, MessagingResponse
+from aws_lambda_sms import sms_handler
+from aws_lambda_email import email_handler
 
-from interpreter import interpret
 from utils import logger, safe
+
 
 LOG = logger(__name__)
 
 
-@safe(safe_return_value="Error retrieving forecast", log=LOG)
-def messages_to_twiml(messages):
-    messages = [messages] if isinstance(messages, str) else messages
-    response = MessagingResponse()
-    for msg in messages:
-        response.message(msg)
-    return response
-
-
-def sms_handler(event, context):
-    LOG.info('event=sms_handler_invoked, lambda_event=%s, lambda_context=%s', event, context)
-    request_body = event["queryStringParameters"]["Body"]
-    result = {
-        "statusCode": 200,
-        "headers": {
-            "Content-Type": "application/xml"
-        },
-        "body": str(messages_to_twiml(interpret(request_body)))
-    }
-    LOG.info('event=sms_handler_success, result=%s', result)
-    return result
-
-
-def email_handler(event, context):
-    LOG.info('event=email_handler_invoked, lambda_event=%s, lambda_context=%s', event, context)
-    result = {}
-    LOG.info('event=email_handler_success, result=%s', result)
-    return result
-
-
 def entrypoint(event, context):
     if "queryStringParameters" in event:
-        return sms_handler(event, context)
+        return sms_handler(event)
+    elif event.get("Records", [{}])[0].get("eventSource") == "aws:ses":
+        return email_handler(event)
     else:
-        return email_handler(event, context)
+        LOG.error('event=unknown_lambda_event, event=%s', event)
+        raise Exception("Unknown lambda event")
 
 
 if __name__ == "__main__":
