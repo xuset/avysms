@@ -63,7 +63,14 @@ def create_response_email(request_email, response_body):
     response_email['To'] = request_email['From']
     response_email['From'] = FORECAST_EMAIL_ADDRESS
     response_email['Subject'] = 'Re: ' + request_email['Subject']
-    response_email['References'] = create_email_reference_list(request_email)
+
+    references = create_email_reference_list(request_email)
+    if references:
+        response_email['References'] = references
+
+    if 'Message-ID' in request_email:
+        response_email['In-Reply-To'] = request_email['Message-ID']
+
     response_email.set_content(response_body)
     return response_email
 
