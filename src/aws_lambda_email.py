@@ -91,7 +91,7 @@ def email_handler(event, should_reply=True):
     if should_reply:
         send_email(response_email)
 
-    LOG.info('event=email_handler_success')
+    LOG.info('event=email_handler_success, body=%s', response_body)
 
     return response_email
 
