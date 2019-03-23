@@ -15,7 +15,7 @@ class TestForecastToText(unittest.TestCase):
             }
         }
         response = sms_handler(event)
-        self.assertIn('This is an automated text message', response["body"])
+        self.assertIn('This is an automated service', response["body"])
         self.assertIn('Sangre de Cristo', response["body"])
 
     def test_sms_handler__request_has_zone__returns_forecast(self):

@@ -85,7 +85,7 @@ def email_handler(event, should_reply=True):
     request_email = retreive_email_from_s3(ses_message_id)
     request_body = get_email_body(request_email)
 
-    response_body = "\n\n".join(interpret(request_body))
+    response_body = "\n\n".join(interpret(request_body, joined=True))
     response_email = create_response_email(request_email, response_body)
 
     if should_reply:

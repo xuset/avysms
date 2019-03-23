@@ -2,25 +2,15 @@
 
 import argparse
 import json
+import jsonpickle
 import sys
-
-from functools import reduce
-from enum import Enum
 
 from forecast import Forecast, LikelihoodType, ProblemType, ElevationType, AspectType, \
     Zone, DangerType, SizeType
-from utils import is_not_None, safe, logger, Data
+from utils import is_not_None, safe, logger
 
-
-MAX_SEGMENTS = 10
-MAX_SGEMENT_CHARS = 153
-
-# List of valid characters to send via sms # https://en.wikipedia.org/wiki/GSM_03.38
-GSM_CHARSET = ("@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞ\x1bÆæßÉ !\"#¤%&'()*+,-./0123456789:;<=>?"
-               "¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ`¿abcdefghijklmnopqrstuvwxyzäöñüà")
 
 LOG = logger(__name__)
-
 
 ZONE_TO_TEXT = {
     Zone.Steamboat.name: "Steamboat & Flat Tops",
@@ -95,37 +85,6 @@ DANGER_TYPE_TO_TEXT = {
 }
 
 
-class MessagePartType(Enum):
-    Header = "Header"
-    Danger = "Danger"
-    Description = "Description"
-    Problem = "Problem"
-    Warning = "Warning"
-
-
-class MessagePart(Data):
-    def __init__(self, part_type, text):
-        self.part_type = part_type
-        self.text = text
-
-
-LONG_MESSAGE_PART_LIST = [
-    MessagePartType.Header,
-    MessagePartType.Danger,
-    MessagePartType.Problem,
-    MessagePartType.Warning,
-    MessagePartType.Description,
-]
-
-
-SHORT_MESSAGE_PART_LIST = [
-    MessagePartType.Header,
-    MessagePartType.Warning,
-    MessagePartType.Danger,
-    MessagePartType.Problem
-]
-
-
 @safe(safe_return_value="Unknown", log=LOG)
 def convert_problem_rose_elevation_aspect_to_text(problem_rose_elevation):
     aspect_entries = list(problem_rose_elevation.items())
@@ -185,12 +144,8 @@ def convert_warning_title_to_text(warning):
 
 
 @safe(log=LOG)
-def convert_warning_to_text(warning, long):
-    title = convert_warning_title_to_text(warning)
-    if long:
-        return "\n".join([title, warning.description])
-    else:
-        return title
+def convert_warning_to_text(warning):
+    return convert_warning_title_to_text(warning)
 
 
 @safe(log=LOG)
@@ -220,84 +175,21 @@ def convert_header_to_text(forecast):
 
 
 @safe(log=LOG)
-def forecast_to_message_parts(forecast, long):
-    message_parts = [
-        MessagePart(MessagePartType.Header, convert_header_to_text(forecast)),
-        MessagePart(MessagePartType.Danger, convert_all_dangers_to_text(forecast.dangers)),
-        MessagePart(MessagePartType.Description, forecast.description),
-        *[MessagePart(MessagePartType.Problem, convert_problem_to_text(p))
-            for p in forecast.problems],
-        *[MessagePart(MessagePartType.Warning, convert_warning_to_text(w, long))
-            for w in forecast.warnings],
+def forecast_to_segments(forecast):
+    segments = [
+        convert_header_to_text(forecast),
+        convert_all_dangers_to_text(forecast.dangers),
+        *[convert_problem_to_text(p) for p in forecast.problems],
+        *[convert_warning_to_text(w) for w in forecast.warnings],
     ]
-    message_parts = filter(lambda part: part.text is not None, message_parts)
-    return list(message_parts)
 
-
-def segment_reducer(new_segments, current_segment):
-    join_str = "\n\n"
-    if len(new_segments) == 0:
-        new_segments.append(current_segment)
-    elif len(current_segment) + len(new_segments[-1]) + len(join_str) < MAX_SGEMENT_CHARS:
-        new_segments[-1] = join_str.join([new_segments[-1], current_segment])
-    else:
-        new_segments.append(current_segment)
-    return new_segments
-
-
-@safe(log=LOG)
-def message_parts_to_segments(message_parts):
-    join_str = "\n\n"
-    segments = map(lambda part: part.text, message_parts)
-    segments = list(reduce(segment_reducer, segments, []))
-
-    for s in segments:
-        if len(s) > MAX_SGEMENT_CHARS:
-            LOG.warning("event=segment_too_large, segmentSize=%d", len(s))
-
+    segments = filter(lambda s: s is not None, segments)
     return list(segments)
-
-
-@safe(log=LOG)
-def filter_non_gsm_chars(text):
-    return "".join(filter(lambda c: c in GSM_CHARSET, text))
-
-
-@safe(log=LOG)
-def forecast_to_segments(forecast, long):
-    filter_list = LONG_MESSAGE_PART_LIST if long else SHORT_MESSAGE_PART_LIST
-
-    message_parts = forecast_to_message_parts(forecast, long)
-    message_parts = filter(lambda part: part.part_type in filter_list, message_parts)
-    message_parts = list(message_parts)
-    message_parts.sort(key=lambda part: filter_list.index(part.part_type))
-    message_parts = map(lambda part:
-                        MessagePart(part.part_type, filter_non_gsm_chars(part.text)),
-                        message_parts)
-
-    segments = message_parts_to_segments(message_parts)
-    return segments
-
-
-@safe(safe_return_value=["Error retrieving forecast"], log=LOG)
-def forecast_to_text(forecast, long):
-    segments = forecast_to_segments(forecast, long)
-
-    text = "\n\n".join(segments)
-    if len(text) > MAX_SEGMENTS * MAX_SGEMENT_CHARS:
-        pad = "..."
-        text = text[0:MAX_SEGMENTS * MAX_SGEMENT_CHARS - len(pad)] + pad
-    return [text]
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-l", "--long", action="store_true")
-    parser.add_argument("-u", "--unsegmented", action="store_true")
     args = parser.parse_args()
 
     forecast = Forecast.from_json(sys.stdin)
-    if args.unsegmented:
-        print(forecast_to_text(forecast, args.long)[0], end='')
-    else:
-        json.dump(forecast_to_segments(forecast, args.long), sys.stdout, indent=4)
+    print(jsonpickle.encode(forecast_to_segments(forecast)), end='')

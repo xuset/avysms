@@ -1,12 +1,14 @@
 #! /usr/bin/env python3
 
+import argparse
 import sys
 
 from forecast import Zone
 from utils import safe, logger
 from download_caic_html import download_html
 from caic_html_to_forecast import parse_forecast
-from forecast_to_text import forecast_to_text, forecast_to_segments
+from forecast_to_segments import forecast_to_segments
+from format_segments import format_segments
 
 LOG = logger(__name__)
 
@@ -58,7 +60,7 @@ CAIC_ZONES_IDS_TO_ZONES = {
 }
 
 HELP_TEXT = "\n".join([
-    "This is an automated text message service for retrieving avalanche forecasts.",
+    "This is an automated service for avalanche forecasts.",
     "Reply with one of the available regions to receive the latest forecast.",
     "",
     *CAIC_ZONE_NAMES,
@@ -66,30 +68,31 @@ HELP_TEXT = "\n".join([
 
 
 @safe(safe_return_value=[HELP_TEXT], log=LOG)
-def interpret(request):
+def interpret(request, joined):
     request = request.lower()
-
-    long = 'long' in request
 
     for zone_name, zone_id in CAIC_ZONE_MATCHES_TO_IDS:
         if request.startswith(zone_name):
             zone = CAIC_ZONES_IDS_TO_ZONES.get(zone_id, None)
             html = download_html(zone_id)
             forecast = parse_forecast(html, zone)
-            if long:
-                return forecast_to_text(forecast, long)
-            else:
-                return forecast_to_segments(forecast, long)
+            segments = forecast_to_segments(forecast)
+            return format_segments(segments, joined)
 
     LOG.warning("event=unknown_request, request=%s", request)
     return [HELP_TEXT]
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        print("\n\n".join(interpret(" ".join(sys.argv[1:]))))
+    parser = argparse.ArgumentParser()
+    parser.add_argument("request", nargs='*')
+    args = parser.parse_args()
+
+    if len(args.request) > 0:
+        request = " ".join(args.request)
+        print("\n\n".join(interpret(request, joined=True)))
     else:
         print(" > ", end="", flush=True)
         for line in sys.stdin:
-            print("\n\n".join(interpret(line)))
+            print("\n\n".join(interpret(line, joined=True)))
             print("\n > ", end="", flush=True)

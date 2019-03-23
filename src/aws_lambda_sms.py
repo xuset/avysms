@@ -32,7 +32,7 @@ def sms_handler(event):
         "headers": {
             "Content-Type": "application/xml"
         },
-        "body": str(messages_to_twiml(interpret(body)))
+        "body": str(messages_to_twiml(interpret(body, joined=False)))
     }
 
     LOG.info('event=sms_handler_success, result=%s', result)
