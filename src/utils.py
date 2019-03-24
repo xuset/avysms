@@ -1,6 +1,8 @@
+import atexit
 import json
 import jsonpickle
 import logging
+import requests
 import sys
 import traceback
 
@@ -17,6 +19,26 @@ def logger(name):
 
 
 LOG = logger(__name__)
+
+REQUESTS_SESSION = None
+
+
+def close_requests_session():
+    global REQUESTS_SESSION
+    if REQUESTS_SESSION is not None:
+        REQUESTS_SESSION.close()
+        REQUESTS_SESSION = None
+
+
+def requests_session():
+    global REQUESTS_SESSION
+    if REQUESTS_SESSION is None:
+        atexit.register(close_requests_session)
+        REQUESTS_SESSION = requests.Session()
+        REQUESTS_SESSION.headers.update({
+            'User-Agent': 'avysms.com 1.0'
+        })
+    return REQUESTS_SESSION
 
 
 def is_not_None(obj):

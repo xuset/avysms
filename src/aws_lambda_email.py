@@ -10,6 +10,7 @@ from email import policy
 from email.parser import BytesParser
 from email.message import EmailMessage
 
+from inreach import is_request_email_from_inreach, send_inreach_response, create_inreach_response
 from interpreter import interpret
 from utils import logger
 
@@ -58,7 +59,7 @@ def create_email_reference_list(request_email):
     return ' '.join(references) if len(references) > 0 else None
 
 
-def create_response_email(request_email, response_body):
+def create_response_email(request_email, response_segments):
     response_email = EmailMessage()
     response_email['To'] = request_email['From']
     response_email['From'] = FORECAST_EMAIL_ADDRESS
@@ -71,7 +72,7 @@ def create_response_email(request_email, response_body):
     if 'Message-ID' in request_email:
         response_email['In-Reply-To'] = request_email['Message-ID']
 
-    response_email.set_content(response_body)
+    response_email.set_content("\n\n".join(response_segments))
     return response_email
 
 
@@ -85,15 +86,21 @@ def email_handler(event, should_reply=True):
     request_email = retreive_email_from_s3(ses_message_id)
     request_body = get_email_body(request_email)
 
-    response_body = "\n\n".join(interpret(request_body, joined=True))
-    response_email = create_response_email(request_email, response_body)
+    response_segments = interpret(request_body, joined=False)
 
-    if should_reply:
-        send_email(response_email)
+    response = None
+    if is_request_email_from_inreach(request_email):
+        response = create_inreach_response(request_email, response_segments)
+        if should_reply:
+            send_inreach_response(response)
+    else:
+        response = create_response_email(request_email, response_segments)
+        if should_reply:
+            send_email(response)
 
-    LOG.info('event=email_handler_success, body=%s', response_body)
+    LOG.info('event=email_handler_success, body=%s', response_segments)
 
-    return response_email
+    return response
 
 
 if __name__ == "__main__":

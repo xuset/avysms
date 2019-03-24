@@ -13,11 +13,11 @@ LOG = logger(__name__)
 
 
 @safe(safe_return_value="Error retrieving forecast", log=LOG)
-def messages_to_twiml(messages):
-    messages = [messages] if isinstance(messages, str) else messages
+def segments_to_twiml(segments):
+    segments = [segments] if isinstance(segments, str) else segments
     response = MessagingResponse()
-    for msg in messages:
-        response.message(msg)
+    for segments in segments:
+        response.message(segments)
     return response
 
 
@@ -32,7 +32,7 @@ def sms_handler(event):
         "headers": {
             "Content-Type": "application/xml"
         },
-        "body": str(messages_to_twiml(interpret(body, joined=False)))
+        "body": str(segments_to_twiml(interpret(body, joined=False)))
     }
 
     LOG.info('event=sms_handler_success, result=%s', result)
