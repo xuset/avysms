@@ -16,7 +16,7 @@ def entrypoint(event, context):
     if "queryStringParameters" in event:
         return sms_handler(event)
     elif event.get("Records", [{}])[0].get("eventSource") == "aws:ses":
-        return email_handler(event)
+        email_handler(event)  # Don't return anything for ses events
     else:
         LOG.error('event=unknown_lambda_event, event=%s', event)
         raise Exception("Unknown lambda event")
