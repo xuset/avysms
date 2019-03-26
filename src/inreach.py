@@ -61,6 +61,11 @@ def create_inreach_response(request_email, response_segments):
     return response
 
 
+@safe(safe_return_value=False, log=LOG)
+def is_inreach_response_successful(response):
+    return response.json()['Success'] is True
+
+
 @safe(log=LOG)
 def send_inreach_response_segment(base_url, reply_address, guid, response_segment):
     payload = {
@@ -69,17 +74,19 @@ def send_inreach_response_segment(base_url, reply_address, guid, response_segmen
         "Guid": guid
     }
     LOG.info('event=sending_inreach_response_segment, base_url=%s, payload=%s', base_url, payload)
+
     response = requests_session().post(base_url, data=payload)
 
-    if not response.ok or response_json["Success"] is not True:
-        response_str = " ".join([str(r.status_code), r.reason, r.text])
-        LOG.error('event=send_inreach_response_segment_failed, response=%s', response_str)
-    else:
+    if is_inreach_response_successful(response):
         LOG.info('event=sent_inreach_response_segment')
+    else:
+        response_str = " ".join([str(response.status_code), response.reason, response.text])
+        LOG.error('event=send_inreach_response_segment_failed, response=%s', response_str)
 
 
 def send_inreach_response(inreach_response):
     base_url = extract_base_url_from_reply_url(inreach_response.reply_url)
+
     for response_segment in inreach_response.response_segments:
         send_inreach_response_segment(**{
             "base_url": base_url,
