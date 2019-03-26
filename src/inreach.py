@@ -53,9 +53,6 @@ def extract_reply_url_from_request_email(request_email):
 
 def create_inreach_response(request_email, response_segments):
     reply_url = extract_reply_url_from_request_email(request_email)
-    if reply_url is None:
-        raise Exception("Could not extract reply_url")
-
     guid = extract_guuid_from_reply_url(reply_url)
     reply_address = extract_reply_address_from_reply_url(reply_url)
 
@@ -73,9 +70,12 @@ def send_inreach_response_segment(base_url, reply_address, guid, response_segmen
     }
     LOG.info('event=sending_inreach_response_segment, base_url=%s, payload=%s', base_url, payload)
     response = requests_session().post(base_url, data=payload)
-    response.raise_for_status()
-    success = response.json()["Success"] is True
-    LOG.info('event=sent_inreach_response_segment, success=%s', success)
+
+    if not response.ok or response_json["Success"] is not True:
+        response_str = " ".join([str(r.status_code), r.reason, r.text])
+        LOG.error('event=send_inreach_response_segment_failed, response=%s', response_str)
+    else:
+        LOG.info('event=sent_inreach_response_segment')
 
 
 def send_inreach_response(inreach_response):
