@@ -1,14 +1,13 @@
 #! /usr/bin/env python3
 
 import argparse
-import json
-import jsonpickle
 import sys
+
+import jsonpickle
 
 from forecast import Forecast, LikelihoodType, ProblemType, ElevationType, AspectType, \
     Zone, DangerType, SizeType
 from utils import is_not_None, safe, logger
-
 
 LOG = logger(__name__)
 
@@ -134,13 +133,15 @@ def convert_problem_to_text(problem):
     ])
 
 
-@safe(safe_return_value="Avalanche warning:", log=LOG)
+@safe(safe_return_value="Avalanche warning in effect", log=LOG)
 def convert_warning_title_to_text(warning):
-    return (
-        " ".join(filter(is_not_None, [
-            warning.title if warning.title is not None else "Avalanche warning",
-            "expires on " + warning.expires if warning.expires is not None else None]))
-        + ":")
+    warning_title = "Avalanche warning"
+    if warning.title is not None:
+        warning_title = warning.title
+    expires = "in effect"
+    if warning.expires is not None:
+        expires = "expires on " + warning.expires
+    return warning_title + " " + expires
 
 
 @safe(log=LOG)

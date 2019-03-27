@@ -15,4 +15,4 @@ Possible large persistent slab avalanche problem
   Near  TL: N NE E SE NW
   Above TL: N NE E SE NW
 
-Special Avalanche Advisory expires on Tuesday, February 19, 2019 at 9:00 AM:
+Special Avalanche Advisory expires on Tuesday, February 19, 2019 at 9:00 AM
