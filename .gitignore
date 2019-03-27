@@ -7,3 +7,4 @@ __pycache__
 pip-selfcheck.json
 pyvenv.cfg
 avysms-entrypoint-lambda.zip
+.idea
