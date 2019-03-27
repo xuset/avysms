@@ -2,13 +2,11 @@
 
 import argparse
 import os
+from email import policy
+from email.parser import BytesParser
 
 import boto3
 import botocore
-
-from email import policy
-from email.parser import BytesParser
-from email.message import EmailMessage
 
 from inreach import is_request_email_from_inreach, send_inreach_response, create_inreach_response
 from interpreter import interpret

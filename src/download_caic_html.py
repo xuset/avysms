@@ -1,8 +1,6 @@
 #! /usr/bin/env python3
 
 import argparse
-import json
-import sys
 
 from utils import logger, requests_session
 

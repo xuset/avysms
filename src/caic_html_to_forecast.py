@@ -2,12 +2,11 @@
 
 import re
 import sys
-import json
-import jsonpickle
+
 from bs4 import BeautifulSoup
 
 from forecast import Forecast, ElevationType, AspectType, ProblemType, LikelihoodType, \
-    Problem, Zone, DangerType, SizeType
+    DangerType, SizeType
 from utils import safe, is_not_None, logger
 
 LOG = logger(__name__)

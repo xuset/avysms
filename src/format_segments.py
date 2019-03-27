@@ -1,15 +1,12 @@
 #! /usr/bin/env python3
 
 import argparse
-import json
-import jsonpickle
 import sys
-
 from functools import reduce
-from enum import Enum
+
+import jsonpickle
 
 from utils import safe, logger
-
 
 MAX_SEGMENTS = 10
 

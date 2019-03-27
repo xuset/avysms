@@ -2,9 +2,8 @@
 
 import json
 import sys
-import os
 
-from twilio.twiml.messaging_response import Message, MessagingResponse
+from twilio.twiml.messaging_response import MessagingResponse
 
 from interpreter import interpret
 from utils import logger, safe

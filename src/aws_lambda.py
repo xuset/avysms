@@ -3,11 +3,9 @@
 import json
 import sys
 
-from aws_lambda_sms import sms_handler
 from aws_lambda_email import email_handler
-
-from utils import logger, safe
-
+from aws_lambda_sms import sms_handler
+from utils import logger
 
 LOG = logger(__name__)
 
